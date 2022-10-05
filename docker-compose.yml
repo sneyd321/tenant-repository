@@ -1,0 +1,18 @@
+version: '3.5'
+
+services: 
+
+    mysql:
+        image: sneyd321/mysql
+        ports: 
+            - 3306:3306
+        cap_add:
+            - SYS_NICE
+
+        volumes: 
+            - C:\Users\Ryan_PC\Projects\RoomRv2-Backend\mysql\mysql-volume\data:/var/lib/mysql 
+  
+            
+
+ 
+    
