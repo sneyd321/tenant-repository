@@ -6,8 +6,6 @@ import pytest, asyncio, json
 
 
     
-
-@pytest.mark.asyncio
 async def test_Tenant_Service_returns_an_error_message_conflict_in_database_when_an_integrity_error_occurs():
     db = DB("test", "homeowner", "localhost", "roomr")
     repository = Repository(db)
@@ -19,7 +17,6 @@ async def test_Tenant_Service_returns_an_error_message_conflict_in_database_when
     assert monad.error_status == {"status": 409, "reason": "Failed to insert data into database"}
    
 
-@pytest.mark.asyncio
 async def test_Tenant_Service_returns_an_empty_list_when_retrieving_a_list_of_zero_items():
     db = DB("test", "homeowner", "localhost", "roomr")
     repository = Repository(db)
@@ -42,7 +39,6 @@ async def test_Tenant_Service_returns_an_error_message_when_account_does_not_exi
  
     assert monad.error_status == {"status": 404, "reason": "No data"}
 
-@pytest.mark.asyncio
 async def test_Tenant_Service_returns_an_error_message_when_password_is_invalid():
     db = DB("test", "homeowner", "localhost", "roomr")
     repository = Repository(db)
@@ -52,7 +48,6 @@ async def test_Tenant_Service_returns_an_error_message_when_password_is_invalid(
     monad = await repository.login(tenant, "bbbbbb")
     assert monad.error_status == {"status": 401, "reason": "Invalid email or password"}
 
-@pytest.mark.asyncio
 async def test_Tenant_Service_returns_an_error_message_with_invalid_house_id():
     db = DB("test", "homeowner", "localhost", "roomr")
     repository = Repository(db)
