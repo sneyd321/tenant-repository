@@ -6,10 +6,8 @@ from sqlalchemy.exc import OperationalError, IntegrityError
 import datetime
 from passlib.context import CryptContext
 
-
 Base = declarative_base()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 class Tenant(Base):
     __tablename__ = 'tenant'
@@ -24,19 +22,18 @@ class Tenant(Base):
     tenantState = Column(String(30), nullable=False)
     deviceId = Column(String(180), nullable=True)
 
-    def __init__(self, houseId, tenantPosition, **kwargs):
-        self.houseId = houseId
+    def __init__(self, password, **kwargs):
+        self.houseId = kwargs.get("houseId")
         self.firstName = kwargs.get("firstName")
         self.lastName = kwargs.get("lastName")
         self.email = kwargs.get("email")
-        self.password = self.get_password_hash(kwargs.get("password"))
-        self.tenantPosition = tenantPosition
+        self.password = self.get_password_hash(password)
+        self.tenantPosition = 0
         self.tenantState = kwargs.get("tenantState")
         self.deviceId = kwargs.get("deviceId", "")
 
     def verify_password(self, plain_password, hashed_password):
         return pwd_context.verify(plain_password, hashed_password)
-
 
     def get_password_hash(self, password):
         return pwd_context.hash(password)

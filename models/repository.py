@@ -1,89 +1,59 @@
-
-from sqlalchemy.exc import OperationalError, IntegrityError
 from models.models import Tenant
 from models.monad import RepositoryMaybeMonad
-from sqlalchemy.orm import declarative_base
-
-Base = declarative_base()
-
 
 class Repository:
 
     def __init__(self, db):
         self.db = db
 
+    async def commit(self, tenant):
+        await self.db.commit()
 
-    async def create_all(self):
-        async with self.db.engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-            await self.db.commit()
-            
+    async def rollback(self, tenant):
+        await self.db.rollback()
+
+    async def calculate_tenant_position(self, tenantCount):
+        if tenantCount > 0:
+            tenantCount -= 1
+        return tenantCount
 
     async def insert(self, tenant):
         async with self.db.get_session():
-            tenantPosition = await self.db.get_tenants_in_house(tenant.houseId)
-            if tenantPosition > 0:
-                tenantPosition -= 1
-            tenant.tenantPosition = tenantPosition
-            emails = await self.db.get_emails()
-            
-            monad = await RepositoryMaybeMonad(tenant).bind(self.db.insert)
-            if tenant.email in emails:
+            #Count tenants with same houseId
+            monad = RepositoryMaybeMonad(tenant)
+            monad = await monad.bind_data(self.db.count_tenants_in_house)
+            monad = await monad.bind_data(self.calculate_tenant_position)
+            #Tenant position is the order the tenant appears in the lease
+            if monad.data != None:
+                tenant.tenantPosition = monad.data
+                monad.data = tenant
+            monad = await monad.bind(self.db.insert)
+            monad = await monad.bind(self.commit)
+            return monad
+
+    async def login(self, tenant, password):
+        async with self.db.get_session():
+            monad = RepositoryMaybeMonad(tenant)
+            monad = await monad.bind_data(self.db.get_tenant_by_email)
+            #Check if tenant exists
+            if monad.data == None:
                 return monad
-                
-            if monad.error_status:
-                await self.db.rollback()
-            else:
-                await self.db.commit()
-            return monad
-
-    async def get_emails(self):
-        async with self.db.get_session():
-            return await self.db.get_emails()
-        
-                
-    async def update(self, data):
-        async with self.db.get_session():
-            monad = await RepositoryMaybeMonad(data).bind(self.db.update)
-            if monad.error_status:
-                await self.db.rollback()
-            else:
-                await self.db.commit()
-            return monad
-
-    async def get(self, data):
-        async with self.db.get_session():
-            monad = await RepositoryMaybeMonad(data).bind(self.db.get)
-            if monad.error_status:
-                await self.db.rollback()
-            else:
-                await self.db.commit()
-            return monad
             
+            #Check if password matches
+            if not tenant.verify_password(password, monad.data.password):
+                return RepositoryMaybeMonad(None, error_status={"status": 401, "reason": "Invalid email or password"})
             
-    async def get_all(self, data):
-        async with self.db.get_session():
-            results = await self.db.get_by_house_id(data)
-            if results:
-                await self.db.commit()
-            else:
-                await self.db.rollback()
-            return results
+            #Check if house id is valid
+            if tenant.houseId != monad.data.houseId:
+                return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Invalid house key"})
+            
+            #Update deviceId recieved in loginData
+            monad = await monad.bind(self.db.update)
+            monad = await monad.bind(self.commit)
+            return monad
 
-    async def get_tenant_by_email(self, data):
-         async with self.db.get_session():
-            results = await self.db.get_tenant_by_email(data)
-            if results:
-                await self.db.commit()
-            else:
-                await self.db.rollback()
-            return results
-
-    async def get_tenant_count_by_house(self, houseId):
+    async def get_tenants_by_house_id(self, tenant):
         async with self.db.get_session():
-            results = await self.db.get_tenants_in_house(houseId)
-            if results:
-                await self.db.commit()
-            else:
-                await self.db.rollback()
-            return results
+            monad = RepositoryMaybeMonad(tenant)
+            monad = await monad.bind_data(self.db.get_by_house_id)
+            return monad

@@ -36,8 +36,8 @@ class DB:
         result = await self.session.execute(select(Tenant).where(Tenant.email == data.email))
         return result.scalars().first()
 
-    async def get_tenants_in_house(self, houseId):
-        result = await self.session.execute(select(func.count(Tenant.email)).where(Tenant.houseId == houseId))
+    async def count_tenants_in_house(self, data):
+        result = await self.session.execute(select(func.count(Tenant.houseId)).where(Tenant.houseId == data.houseId))
         return result.scalars().first()
 
     async def insert(self, data):
