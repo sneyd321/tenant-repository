@@ -28,9 +28,7 @@ class Repository:
                 tenant.tenantPosition = monad.data
                 monad.data = tenant
             monad = await monad.bind(self.db.insert)
-            print(monad.error_status)
             monad = await monad.bind(self.commit)
-            print(monad.error_status)
             return monad
 
     async def login(self, tenant, password):
