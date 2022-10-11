@@ -34,6 +34,11 @@ jobs:
       - name: Build MySQL
         run: |
           docker build -t sneyd321/mysql ./mysql-docker-kubernetes
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Boot Docker Compose
+        run: |
+          docker compose up
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
