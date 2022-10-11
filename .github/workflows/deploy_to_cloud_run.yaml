@@ -25,7 +25,7 @@ jobs:
           | tar xz docker-credential-gcr \
           && chmod +x docker-credential-gcr && sudo mv docker-credential-gcr /usr/bin/
           docker-credential-gcr configure-docker --registries=us-central1-docker.pkg.dev
-          docker build -t sneyd321/us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service .
+          docker build -t us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service .
           docker push us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service
           
     
