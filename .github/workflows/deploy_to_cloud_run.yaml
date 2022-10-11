@@ -1,7 +1,6 @@
 name: Deploy to cloud run
 on: [push]
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
