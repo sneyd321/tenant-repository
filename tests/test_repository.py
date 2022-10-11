@@ -16,8 +16,9 @@ async def test_Tenant_Service_returns_an_error_message_conflict_in_database_when
     db = DB("test", "homeowner", "localhost", "roomr")
     print(os.getcwd())
     repository = Repository(db)
-    with open("./tests/sample_tenant.json", mode="r") as sample_tenant:
+    with open(r"./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
+        print(tenantData)
         tenant = Tenant(**tenantData)
       
     monad = await repository.insert(tenant)
