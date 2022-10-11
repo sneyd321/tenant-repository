@@ -23,6 +23,7 @@ jobs:
       - name: Configure Docker
         run: |
           gcloud auth configure-docker us-central1-docker.pkg.dev
+          
           docker build -t us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service .
           docker push us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service
           
