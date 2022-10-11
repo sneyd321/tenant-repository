@@ -18,6 +18,7 @@ async def test_Tenant_Service_returns_an_error_message_conflict_in_database_when
     with open("./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
         tenant = Tenant(**tenantData)
+        tenant.email = "a@s.com"
     monad = await repository.insert(tenant)
     monad = await repository.insert(tenant)
     assert monad.error_status == {"status": 409, "reason": "Failed to insert data into database"}
