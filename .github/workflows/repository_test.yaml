@@ -29,7 +29,7 @@ jobs:
       - name: Checkout MySQL Repo
         uses: actions/checkout@v3
         with:
-          repository: sneyd321
+          repository: sneyd321/mysql-docker-kubernetes
           path: mysql-docker-kubernetes
       - name: Build MySQL
         run: |
