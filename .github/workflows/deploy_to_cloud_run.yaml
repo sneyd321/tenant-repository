@@ -28,6 +28,7 @@ jobs:
           docker push us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service
       - name: Deploy to Cloud run
         run: |
+        
           gcloud run deploy tenant-service --region=us-central1 --image us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service:latest --allow-unauthenticated --update-secrets=DB_PASS=DB_PASS:1 --update-env-vars DB_HOST=10.128.0.19,DB_USER=service
           
     
