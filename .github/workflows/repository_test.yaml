@@ -29,7 +29,7 @@ jobs:
       
       - name: Pull MySQL
         run: |
-          docker pull us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/mysql
+          docker push us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/mysql
       
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
