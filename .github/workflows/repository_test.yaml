@@ -24,6 +24,8 @@ jobs:
           service_account: 'artifact-repository-access@roomr-222721.iam.gserviceaccount.com'
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v0'
+      - name: Configure Docker
+        run: gcloud auth configure-docker --quiet
       
       - name: Pull MySQL
         run: |
