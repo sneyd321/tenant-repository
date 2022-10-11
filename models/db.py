@@ -29,7 +29,7 @@ class DB:
         return result.scalars().all()
 
     
-    async def get_emails(self):
+    async def get_emails(self, tenant):
         result = await self.session.execute(select(Tenant.email))
         return result.scalars().all()
 

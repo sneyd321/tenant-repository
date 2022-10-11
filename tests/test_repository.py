@@ -21,7 +21,7 @@ async def test_Tenant_Service_returns_an_error_message_conflict_in_database_when
         tenant = Tenant(**tenantData)
       
     monad = await repository.insert(tenant)
-    time.sleep(60)
+
     monad = await repository.insert(tenant)
 
     assert monad.error_status == {"status": 409, "reason": "Failed to insert data into database"}

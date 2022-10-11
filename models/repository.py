@@ -21,6 +21,10 @@ class Repository:
         async with self.db.get_session():
             # Count tenants with same houseId
             monad = RepositoryMaybeMonad(tenant)
+            monad = await monad.bind_data(self.db.get_tenant_by_email)
+            if monad.data is not None:
+                return RepositoryMaybeMonad(None, error_status={"status": 409, "reason": "Failed to insert data into database"})
+            monad.data = tenant
             monad = await monad.bind_data(self.db.count_tenants_in_house)
             monad = await monad.bind_data(self.calculate_tenant_position)
             # Update tenant with position it will appear in lease agreement
