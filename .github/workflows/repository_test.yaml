@@ -60,4 +60,4 @@ jobs:
           alembic upgrade head
       - name: Test with pytest
         run: |
-          pytest tests --asyncio-mode=strict
+          pytest tests/test_repository --asyncio-mode=strict

@@ -1,7 +1,7 @@
 from models.db import DB
 from models.repository import Repository
 from models.models import Tenant
-import pytest, asyncio, json
+import pytest, asyncio, json, os
 
 
 @pytest.fixture(scope="session")
@@ -14,11 +14,12 @@ def event_loop():
 @pytest.mark.asyncio
 async def test_Tenant_Service_returns_an_error_message_conflict_in_database_when_an_integrity_error_occurs():
     db = DB("test", "homeowner", "localhost", "roomr")
+    print(os.getcwd())
     repository = Repository(db)
     with open("./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
         tenant = Tenant(**tenantData)
-        tenant.email = "a@s.com"
+      
     monad = await repository.insert(tenant)
     monad = await repository.insert(tenant)
     assert monad.error_status == {"status": 409, "reason": "Failed to insert data into database"}
