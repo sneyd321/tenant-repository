@@ -28,7 +28,7 @@ jobs:
         run: gcloud auth configure-docker --quiet
       - uses: actions/checkout@v3
         with:
-          repository: 'https://github.com/sneyd321/mysql-docker-kubernetes.git'
+          repository: 'sneyd321/mysql-docker-kubernetes.git'
       - name: Pull MySQL
         run: |
           docker build -t sneyd321/mysql .
