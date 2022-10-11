@@ -26,12 +26,10 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v0'
       - name: Configure Docker
         run: gcloud auth configure-docker --quiet
-      - uses: actions/checkout@v3
-        with:
-          repository: 'sneyd321/mysql-docker-kubernetes.git'
+     
       - name: Pull MySQL
         run: |
-          docker build -t sneyd321/mysql .
+          docker build -t sneyd321/tenant-service .
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
