@@ -1,9 +1,6 @@
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Date
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import relationship
-from sqlalchemy.exc import OperationalError, IntegrityError
-import datetime
 from passlib.context import CryptContext
 
 Base = declarative_base()

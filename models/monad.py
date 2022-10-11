@@ -1,17 +1,18 @@
 from collections.abc import Callable
 from sqlalchemy.exc import OperationalError, IntegrityError
 
+
 class RepositoryMaybeMonad:
     def __init__(self, data, error_status = None):
         self.data = data
         self.error_status = error_status
 
     def has_errors(self):
-        return self.error_status != None
+        return self.error_status is not None
 
     async def bind(self, function: Callable):
-        if self.data == None:
-            if self.error_status == None:
+        if self.data is None:
+            if self.error_status is None:
                 self.error_status = {"status": 404, "reason": "No data in repository monad"}
                 return RepositoryMaybeMonad(data=None, error_status=self.error_status)
             return RepositoryMaybeMonad(data=None, error_status=self.error_status)
@@ -26,11 +27,11 @@ class RepositoryMaybeMonad:
             return RepositoryMaybeMonad(None, error_status=self.error_status)
 
     async def bind_data(self, function: Callable):
-        if self.data == None:
+        if self.data is None:
             return RepositoryMaybeMonad(data=None, error_status=self.error_status)
         try:
             result = await function(self.data)
-            if result == None:
+            if result is None:
                 self.error_status = {"status": 404, "reason": "No data"}
                 return RepositoryMaybeMonad(data=None, error_status=self.error_status)
             return RepositoryMaybeMonad(data=result, error_status=self.error_status)

@@ -1,5 +1,5 @@
-from models.models import Tenant
 from models.monad import RepositoryMaybeMonad
+
 
 class Repository:
 
@@ -19,12 +19,12 @@ class Repository:
 
     async def insert(self, tenant):
         async with self.db.get_session():
-            #Count tenants with same houseId
+            # Count tenants with same houseId
             monad = RepositoryMaybeMonad(tenant)
             monad = await monad.bind_data(self.db.count_tenants_in_house)
             monad = await monad.bind_data(self.calculate_tenant_position)
-            #Update tenant with position it will appear in lease agreement
-            if monad.data != None:
+            # Update tenant with position it will appear in lease agreement
+            if monad.data is not None:
                 tenant.tenantPosition = monad.data
                 monad.data = tenant
             monad = await monad.bind(self.db.insert)
@@ -35,11 +35,11 @@ class Repository:
         async with self.db.get_session():
             monad = RepositoryMaybeMonad(tenant)
             monad = await monad.bind_data(self.db.get_tenant_by_email)
-            #Check if tenant exists
-            if monad.data == None:
+            # Check if tenant exists
+            if monad.data is None:
                 return monad
             
-            #Check if password matches
+            # Check if password matches
             if not tenant.verify_password(password, monad.data.password):
                 return RepositoryMaybeMonad(None, error_status={"status": 401, "reason": "Invalid email or password"})
             
@@ -57,3 +57,4 @@ class Repository:
             monad = RepositoryMaybeMonad(tenant)
             monad = await monad.bind_data(self.db.get_by_house_id)
             return monad
+            

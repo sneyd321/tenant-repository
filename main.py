@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException
-from models.schemas import *
+from models.schemas import TenantSchema, LoginSchema
 from models.db import DB
 from models.models import Tenant
 from models.repository import Repository
-import uvicorn, os, json
+import uvicorn, os
 
 user = os.environ.get('DB_USER', "test")
 password = os.environ.get('DB_PASS', "homeowner")
@@ -14,9 +14,11 @@ db = DB(user, password, host, database)
 repository = Repository(db)
 app = FastAPI()
 
+
 @app.get("/Health")
 async def health_check():
     return {"status": 200}
+
 
 @app.post("/Tenant")
 async def create_tenant(request: TenantSchema):
@@ -26,6 +28,7 @@ async def create_tenant(request: TenantSchema):
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return tenant.to_json()
 
+
 @app.post("/Login")
 async def login(request: LoginSchema):
     loginData = request.dict()
@@ -34,6 +37,7 @@ async def login(request: LoginSchema):
     if monad.error_status:
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return monad.data.to_json()
+
 
 @app.get("/House/{houseId}/Tenant")
 async def get_tenants_by_house_id(houseId: int):

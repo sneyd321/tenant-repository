@@ -1,4 +1,3 @@
-from typing import Set, Union, List
 from pydantic import BaseModel
 
 
@@ -9,6 +8,7 @@ class TenantSchema(BaseModel):
     password: str
     tenantState: str
     houseId: int
+
 
 class LoginSchema(BaseModel):
     email: str

@@ -1,11 +1,11 @@
 from sqlalchemy.ext.asyncio import create_async_engine
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import insert, update, delete
+from sqlalchemy import update, delete
 from sqlalchemy.future import select
 from models.models import Tenant
 from sqlalchemy import func
+
 
 class DB:
 
@@ -18,39 +18,47 @@ class DB:
     def get_session(self):
         return self.session
         
+
     async def get(self, data):
         result = await self.session.execute(select(Tenant).where(Tenant.id == data.id))
         return result.scalars().first()
+
 
     async def get_by_house_id(self, data):
         result = await self.session.execute(select(Tenant).where(Tenant.houseId == data.houseId))
         return result.scalars().all()
 
     
-
     async def get_emails(self):
         result = await self.session.execute(select(Tenant.email))
         return result.scalars().all()
+
 
     async def get_tenant_by_email(self, data):
         result = await self.session.execute(select(Tenant).where(Tenant.email == data.email))
         return result.scalars().first()
 
+
     async def count_tenants_in_house(self, data):
         result = await self.session.execute(select(func.count(Tenant.houseId)).where(Tenant.houseId == data.houseId))
         return result.scalars().first()
 
+
     async def insert(self, data):
         self.session.add(data)
-            
+
+
     async def commit(self):
         await self.session.commit()
     
+
     async def rollback(self):
         await self.session.rollback()
     
+
     async def update(self, data):
         await self.session.execute(update(Tenant).where(Tenant.id == data.id).values(data.to_dict()))
+       
        
     async def update_device_id(self, data):
         await self.session.execute(update(Tenant).where(Tenant.id == data.id).values(data.to_dict()))

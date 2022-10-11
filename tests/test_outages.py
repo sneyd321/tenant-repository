@@ -1,8 +1,7 @@
 from models.db import DB
 from models.repository import Repository
 from models.models import Tenant
-
-import pytest, asyncio
+import asyncio
 
 
 def test_Tenant_Service_returns_an_error_message_unable_to_connect_to_database():

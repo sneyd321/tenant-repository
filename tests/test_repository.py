@@ -1,7 +1,6 @@
 from models.db import DB
 from models.repository import Repository
 from models.models import Tenant
-
 import pytest, asyncio, json
 
 
