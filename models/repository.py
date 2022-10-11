@@ -23,7 +23,7 @@ class Repository:
             monad = RepositoryMaybeMonad(tenant)
             monad = await monad.bind_data(self.db.count_tenants_in_house)
             monad = await monad.bind_data(self.calculate_tenant_position)
-            #Tenant position is the order the tenant appears in the lease
+            #Update tenant with position it will appear in lease agreement
             if monad.data != None:
                 tenant.tenantPosition = monad.data
                 monad.data = tenant
