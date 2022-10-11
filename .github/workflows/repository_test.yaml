@@ -20,6 +20,7 @@ jobs:
         uses: 'google-github-actions/auth@v0'
         with:
           workload_identity_provider: 'projects/959426188245/locations/global/workloadIdentityPools/github-action-pool-1/providers/github-action-provider-1'
+          service_account: 'artifact-repository-access@roomr-222721.iam.gserviceaccount.com'
       - name: Pull MySQL
         run: |
           docker pull us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/mysql
