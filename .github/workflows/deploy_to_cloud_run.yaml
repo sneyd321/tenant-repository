@@ -21,7 +21,7 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v0'
       - name: Configure Docker
         run: |
-          curl -fsSL "https://github.com/GoogleCloudPlatform/docker-credential-gcr/releases/download/v${VERSION}/docker-credential-gcr_linux_amd64-2.1.6.tar.gz" \
+          curl -fsSL "https://github.com/GoogleCloudPlatform/docker-credential-gcr/releases/download/v2.1.6/docker-credential-gcr_linux_amd64-2.1.6.tar.gz" \
           | tar xz docker-credential-gcr \
           && chmod +x docker-credential-gcr && sudo mv docker-credential-gcr /usr/bin/
           docker-credential-gcr configure-docker --registries=us-central1-docker.pkg.dev
