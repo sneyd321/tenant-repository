@@ -21,10 +21,10 @@ class RepositoryMaybeMonad:
             return RepositoryMaybeMonad(data=self.data, error_status=self.error_status)
         except OperationalError:
             self.error_status = {"status": 502, "reason": "Failed to connect to database"}
-            return RepositoryMaybeMonad(None, error_status=self.error_status)
+            return RepositoryMaybeMonad(data=None, error_status=self.error_status)
         except IntegrityError:
             self.error_status = {"status": 409, "reason": "Failed to insert data into database"}
-            return RepositoryMaybeMonad(None, error_status=self.error_status)
+            return RepositoryMaybeMonad(data=None, error_status=self.error_status)
 
     async def bind_data(self, function: Callable):
         if self.data is None:

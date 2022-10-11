@@ -28,7 +28,9 @@ class Repository:
                 tenant.tenantPosition = monad.data
                 monad.data = tenant
             monad = await monad.bind(self.db.insert)
+            print(monad.error_status)
             monad = await monad.bind(self.commit)
+            print(monad.error_status)
             return monad
 
     async def login(self, tenant, password):
@@ -57,4 +59,3 @@ class Repository:
             monad = RepositoryMaybeMonad(tenant)
             monad = await monad.bind_data(self.db.get_by_house_id)
             return monad
-            

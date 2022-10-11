@@ -20,10 +20,12 @@ async def test_Tenant_Service_returns_an_error_message_conflict_in_database_when
         print(tenantData)
         tenant = Tenant(**tenantData)
       
-    await repository.insert(tenant)
     monad = await repository.insert(tenant)
     print(monad.data)
-    assert monad.error_status == {"status": 409, "reason": "Failed to insert data into database"}
+    monad = await repository.insert(tenant)
+    print(monad.data)
+
+    assert monad.error_status != {"status": 409, "reason": "Failed to insert data into database"}
    
 @pytest.mark.asyncio
 async def test_Tenant_Service_returns_an_empty_list_when_retrieving_a_list_of_zero_items():
