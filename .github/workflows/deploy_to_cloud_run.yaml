@@ -22,7 +22,7 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v0'
       - name: Configure Docker
         run: |
-          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin us-central1-docker.pkg.dev
+          gcloud auth print-access-token --impersonate-service-account artifact-repository-access@roomr-222721.iam.gserviceaccount.com | docker login -u oauth2accesstoken --password-stdin https://us-central1-docker.pkg.dev
           docker build -t us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service .
           docker push us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service
           
