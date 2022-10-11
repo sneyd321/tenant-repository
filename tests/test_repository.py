@@ -14,7 +14,6 @@ def event_loop():
 @pytest.mark.asyncio
 async def test_Tenant_Service_returns_an_error_message_conflict_in_database_when_an_integrity_error_occurs():
     db = DB("test", "homeowner", "localhost", "roomr")
-    print(os.getcwd())
     repository = Repository(db)
     with open(r"./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
@@ -23,6 +22,7 @@ async def test_Tenant_Service_returns_an_error_message_conflict_in_database_when
       
     monad = await repository.insert(tenant)
     monad = await repository.insert(tenant)
+    print(monad.data)
     assert monad.error_status == {"status": 409, "reason": "Failed to insert data into database"}
    
 @pytest.mark.asyncio
@@ -58,6 +58,8 @@ async def test_Tenant_Service_returns_an_error_message_when_password_is_invalid(
     monad = await repository.login(tenant, "bbbbbb")
     assert monad.error_status == {"status": 401, "reason": "Invalid email or password"}
 
+
+@pytest.mark.asyncio
 async def test_Tenant_Service_returns_an_error_message_with_invalid_house_id():
     db = DB("test", "homeowner", "localhost", "roomr")
     repository = Repository(db)
