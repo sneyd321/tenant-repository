@@ -7,7 +7,7 @@ services:
         ports: 
             - 3306:3306
         environment: 
-            - MYSQL_ROOT_PASSWORD:Homeowner
+            - MYSQL_ROOT_PASSWORD=Homeowner
         cap_add:
             - SYS_NICE
 
