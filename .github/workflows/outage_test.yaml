@@ -1,4 +1,4 @@
-name: Run Repository Tests
+name: Run Outage Tests
 on: [push]
 
 jobs:
