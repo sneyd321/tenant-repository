@@ -15,7 +15,7 @@ jobs:
 
 
     steps:
-      - uses: actions/checkout@v3
+      
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v0'
@@ -26,11 +26,13 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v0'
       - name: Configure Docker
         run: gcloud auth configure-docker --quiet
-      
+      - uses: actions/checkout@v3
+        with:
+          repository: 'https://github.com/sneyd321/mysql-docker-kubernetes.git'
       - name: Pull MySQL
         run: |
-          docker push us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/mysql
-      
+          docker build -t sneyd321/mysql .
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
