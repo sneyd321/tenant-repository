@@ -1,6 +1,6 @@
 __pycache__
 .pytest_cache
 models/__pycache__
-scripts/versions
+scripts/versions/*
 venv
 scratchpad.txt
