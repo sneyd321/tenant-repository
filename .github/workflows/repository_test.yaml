@@ -8,9 +8,19 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
+        
+    permissions:
+      contents: 'read'
+      id-token: 'write'
 
     steps:
       - uses: actions/checkout@v3
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          workload_identity_provider: 'projects/959426188245/locations/global/workloadIdentityPools/github-action-pool-1/providers/github-action-provider-1'
+          service_account: 'artifact-repository-access@roomr-222721.iam.gserviceaccount.com'
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
