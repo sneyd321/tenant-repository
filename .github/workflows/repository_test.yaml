@@ -13,18 +13,32 @@ jobs:
       contents: 'read'
       id-token: 'write'
 
+
     steps:
-      - uses: actions/checkout@v3
+      
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v0'
         with:
           workload_identity_provider: 'projects/959426188245/locations/global/workloadIdentityPools/github-action-pool-1/providers/github-action-provider-1'
           service_account: 'artifact-repository-access@roomr-222721.iam.gserviceaccount.com'
-      - name: Pull MySQL
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
+      - name: Configure Docker
+        run: gcloud auth configure-docker --quiet
+      - name: Checkout MySQL Repo
+        uses: actions/checkout@v3
+        with:
+          repository: sneyd321/mysql-docker-kubernetes
+          path: mysql-docker-kubernetes
+      - name: Build MySQL
         run: |
-          docker pull us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/mysql
-      
+          docker build -t sneyd321/mysql ./mysql-docker-kubernetes
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Boot Docker Compose
+        run: |
+          docker compose up
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
