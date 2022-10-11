@@ -32,7 +32,7 @@ class Repository:
             return monad
 
     async def login(self, tenant, password):
-        async with self.db.get_session():
+        async with self.db.get_session() as session:
             monad = RepositoryMaybeMonad(tenant)
             monad = await monad.bind_data(self.db.get_tenant_by_email)
             # Check if tenant exists
@@ -50,6 +50,7 @@ class Repository:
             #Update deviceId recieved in loginData
             monad = await monad.bind(self.db.update)
             monad = await monad.bind(self.commit)
+            session.flush()
             return monad
 
     async def get_tenants_by_house_id(self, tenant):
