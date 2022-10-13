@@ -24,7 +24,7 @@ async def health_check():
 async def create_tenant(request: TenantSchema):
     tenant = Tenant(**request.dict())
     monad = await repository.insert(tenant)
-    if monad.error_status:
+    if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return tenant.to_json()
 
@@ -34,7 +34,7 @@ async def login(request: LoginSchema):
     loginData = request.dict()
     tenant = Tenant(**loginData)
     monad = await repository.login(tenant, loginData["password"])
-    if monad.error_status:
+    if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return monad.data.to_json()
 
@@ -43,7 +43,7 @@ async def login(request: LoginSchema):
 async def get_tenants_by_house_id(houseId: int):
     tenant = Tenant(password="", houseId=houseId)
     monad = await repository.get_tenants_by_house_id(tenant)
-    if monad.error_status:
+    if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return [tenant.to_json() for tenant in monad.data]
 

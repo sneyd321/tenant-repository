@@ -35,7 +35,7 @@ async def test_Tenant_Service_returns_an_empty_list_when_retrieving_a_list_of_ze
         tenant = Tenant(**tenantData)
         tenant.houseId = -1
     monad = await repository.get_tenants_by_house_id(tenant)
-    assert monad.data == []
+    assert monad.get_param_at(0) == []
 
 @pytest.mark.asyncio
 async def test_Tenant_Service_returns_an_error_message_when_account_does_not_exist():
@@ -47,7 +47,7 @@ async def test_Tenant_Service_returns_an_error_message_when_account_does_not_exi
         tenant.email = "ZQAFDSAF@DFSAFDASF.com"
     monad = await repository.login(tenant, "aaaaaa")
  
-    assert monad.error_status == {"status": 404, "reason": "No data"}
+    assert monad.error_status == {"status": 401, "reason": "Invalid email or password"}
 
 @pytest.mark.asyncio
 async def test_Tenant_Service_returns_an_error_message_when_password_is_invalid():

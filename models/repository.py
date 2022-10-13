@@ -6,59 +6,52 @@ class Repository:
     def __init__(self, db):
         self.db = db
 
-    async def commit(self, tenant):
-        await self.db.commit()
-
-    async def rollback(self, tenant):
-        await self.db.rollback()
-
-    async def calculate_tenant_position(self, tenantCount):
+    async def calculate_tenant_lease_position(self, tenantCount, tenant):
         if tenantCount > 0:
-            tenantCount -= 1
-        return tenantCount
+            tenantCount -= 1 
+        tenant.tenantPosition = tenantCount
+        return tenant
 
     async def insert(self, tenant):
         async with self.db.get_session():
-            # Count tenants with same houseId
-            monad = RepositoryMaybeMonad(tenant)
-            monad = await monad.bind_data(self.db.get_tenant_by_email)
-            if monad.data is not None:
-                return RepositoryMaybeMonad(None, error_status={"status": 409, "reason": "Failed to insert data into database"})
-            monad.data = tenant
-            monad = await monad.bind_data(self.db.count_tenants_in_house)
-            monad = await monad.bind_data(self.calculate_tenant_position)
-            # Update tenant with position it will appear in lease agreement
-            if monad.data is not None:
-                tenant.tenantPosition = monad.data
-                monad.data = tenant
-            monad = await monad.bind(self.db.insert)
-            monad = await monad.bind(self.commit)
-            return monad
+            monad = await RepositoryMaybeMonad(tenant) \
+                .bind_data(self.db.get_tenant_by_email)
+            if monad.get_param_at(0):
+                return RepositoryMaybeMonad(error_status={"status": 409, "reason": "Failed to insert data into database"})
+            monad = await RepositoryMaybeMonad(tenant) \
+                .bind_data(self.db.count_tenants_in_house)
+            monad = await RepositoryMaybeMonad(monad.get_param_at(0), tenant) \
+                .bind_data(self.calculate_tenant_lease_position)
+            await RepositoryMaybeMonad(monad.get_param_at(0)) \
+                .bind(self.db.insert)
+            return await RepositoryMaybeMonad() \
+                .bind(self.db.commit)
+           
 
     async def login(self, tenant, password):
         async with self.db.get_session() as session:
-            monad = RepositoryMaybeMonad(tenant)
-            monad = await monad.bind_data(self.db.get_tenant_by_email)
-            # Check if tenant exists
-            if monad.data is None:
-                return monad
+            monad = await RepositoryMaybeMonad(tenant) \
+                .bind_data(self.db.get_tenant_by_email)
+            tenantFromDB = monad.get_param_at(0)
             
-            # Check if password matches
-            if not tenant.verify_password(password, monad.data.password):
+            if tenantFromDB is None:
                 return RepositoryMaybeMonad(None, error_status={"status": 401, "reason": "Invalid email or password"})
-            
-            #Check if house id is valid
-            if tenant.houseId != monad.data.houseId:
+    
+            if not tenant.verify_password(password, tenantFromDB.password):
+                return RepositoryMaybeMonad(None, error_status={"status": 401, "reason": "Invalid email or password"})
+
+            if tenant.houseId != tenantFromDB.houseId:
                 return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Invalid house key"})
             
-            #Update deviceId recieved in loginData
-            monad = await monad.bind(self.db.update)
-            monad = await monad.bind(self.commit)
-            session.flush()
-            return monad
+            await RepositoryMaybeMonad(tenant) \
+                .bind(self.db.update)
+
+            return await RepositoryMaybeMonad(tenant) \
+                .bind(self.commit)
+        
 
     async def get_tenants_by_house_id(self, tenant):
         async with self.db.get_session():
-            monad = RepositoryMaybeMonad(tenant)
-            monad = await monad.bind_data(self.db.get_by_house_id)
-            return monad
+            return await RepositoryMaybeMonad(tenant) \
+                .bind_data(self.db.get_by_house_id)
+    
