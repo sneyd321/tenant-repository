@@ -26,7 +26,7 @@ async def create_tenant(request: TenantSchema):
     monad = await repository.insert(tenant)
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
-    return tenant.to_json()
+    return monad.get_param_at(0).to_json()
 
 
 @app.post("/Login")
@@ -36,7 +36,7 @@ async def login(request: LoginSchema):
     monad = await repository.login(tenant, loginData["password"])
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
-    return monad.data.to_json()
+    return monad.get_param_at(0).to_json()
 
 
 @app.get("/House/{houseId}/Tenant")
@@ -45,7 +45,7 @@ async def get_tenants_by_house_id(houseId: int):
     monad = await repository.get_tenants_by_house_id(tenant)
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
-    return [tenant.to_json() for tenant in monad.data]
+    return [tenant.to_json() for tenant in monad.get_param_at(0)]
 
 
 if __name__ == '__main__':

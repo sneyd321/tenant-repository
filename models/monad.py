@@ -39,12 +39,13 @@ class RepositoryMaybeMonad:
         """
         print(function.__name__, f"Data: {self.data}, Error Status: {self.error_status}")
         # If Tuple contains None
-        if not all(self.data):
+        if len([i for i in self.data if i is not None]) != len(self.data):
             if self.error_status is None:
                 return RepositoryMaybeMonad(None, error_status={"status": 404, "reason": "No data in repository monad"})
             return RepositoryMaybeMonad(None, error_status=self.error_status)
         try:
             result = await function(*self.data)
+            print(function.__name__, result)
             return RepositoryMaybeMonad(result, error_status=self.error_status)
         except OperationalError:
             return RepositoryMaybeMonad(None, error_status={"status": 502, "reason": "Failed to connect to database"})
