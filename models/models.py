@@ -4,10 +4,12 @@ from sqlalchemy.orm import declarative_base
 from passlib.context import CryptContext
 
 Base = declarative_base()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 class Tenant(Base):
     __tablename__ = 'tenant'
+
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     id = Column(Integer(), primary_key=True)
     houseId = Column(Integer(), nullable=False)
@@ -30,10 +32,10 @@ class Tenant(Base):
         self.deviceId = kwargs.get("deviceId", "")
 
     def verify_password(self, plain_password, hashed_password):
-        return pwd_context.verify(plain_password, hashed_password)
+        return self.pwd_context.verify(plain_password, hashed_password)
 
     def get_password_hash(self, password):
-        return pwd_context.hash(password)
+        return self.pwd_context.hash(password)
 
     def to_json(self):
         return {
