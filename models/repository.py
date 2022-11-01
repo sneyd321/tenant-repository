@@ -55,7 +55,7 @@ class Repository:
             if tenant.houseId != monad.get_param_at(0).houseId:
                 return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Invalid house key"})
             
-            monad = await RepositoryMaybeMonad(tenant) \
+            await RepositoryMaybeMonad(tenant) \
                 .bind(self.db.update)
 
             await RepositoryMaybeMonad() \
