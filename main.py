@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from models.schemas import TenantSchema, LoginSchema
+from models.schemas import TenantSchema, LoginSchema, TempTenantSchema, TenantStateSchema
 from models.db import DB
 from models.models import Tenant
 from models.repository import Repository
@@ -21,13 +21,23 @@ async def health_check():
 
 
 @app.post("/Tenant")
-async def create_tenant(request: TenantSchema):
-    tenant = Tenant(**request.dict())
-    monad = await repository.insert(tenant)
+async def create_tenant(request: TempTenantSchema):
+    tenant = Tenant(**request.dict(), password="", tenantState="Temp_Account_Created")
+    monad = await repository.insert_temp(tenant)
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return monad.get_param_at(0).to_json()
 
+@app.post("/Tenant/{tenantState}")
+async def update_tenant_state(tenantState: str, request: TenantStateSchema):
+    tenant = Tenant(**request.dict(), password="", tenantState=tenantState)
+    monad = await repository.update_tenant(tenant, tenantState)
+    if monad.has_errors():
+        return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
+    return monad.get_param_at(0).to_json()
+    
+
+    
 
 @app.post("/Login")
 async def login(request: LoginSchema):

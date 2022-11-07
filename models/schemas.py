@@ -6,8 +6,19 @@ class TenantSchema(BaseModel):
     lastName: str
     email: str
     password: str
-    tenantState: str
+
+
+class TempTenantSchema(BaseModel):
+    firstName: str
+    lastName: str
+    email: str
     houseId: int
+
+
+class TenantStateSchema(BaseModel):
+    firstName: str
+    lastName: str
+    email: str
 
 
 class LoginSchema(BaseModel):

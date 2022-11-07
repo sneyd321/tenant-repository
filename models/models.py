@@ -45,17 +45,16 @@ class Tenant(Base):
             "email": self.email,
             "tenantState": self.tenantState,
             "tenantPosition": self.tenantPosition,
-             "deviceId": self.deviceId
+            "deviceId": self.deviceId
         }
 
     def to_dict(self):
         return {
-            "houseId": self.houseId,
             "id": self.id,
             "firstName": self.firstName,
             "lastName": self.lastName,
-            "email": self.email,
             "tenantState": self.tenantState,
+            "tenantPosition": self.tenantPosition,
             "deviceId": self.deviceId
         }
     
