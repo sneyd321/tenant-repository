@@ -59,6 +59,8 @@ class Repository:
             #Set Tenant Fields
             tenant.houseId = tenantFromDB.houseId
             tenant.tenantState = tenantState
+            tenant.id = tenantFromDB.id
+            
             
             monad = await RepositoryMaybeMonad(tenant) \
                 .bind_data(self.db.count_tenants_in_house)
@@ -77,7 +79,6 @@ class Repository:
 
             await RepositoryMaybeMonad() \
                 .bind(self.db.commit)
-
             return monad
            
 
@@ -95,9 +96,22 @@ class Repository:
             if tenant.houseId != monad.get_param_at(0).houseId:
                 return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Invalid house key"})
             
-            await RepositoryMaybeMonad(tenant) \
-                .bind(self.db.update)
+            if monad.get_param_at(0).tenantState == "TempAccountCreated":
+                return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Not Approved. Please message landlord to invite you."})
 
+            if monad.get_param_at(0).tenantState == "PendingInvite":
+                return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Not Approved. Please check email for an email to activate you account."})
+
+            if monad.get_param_at(0).tenantState == "PendingApproval":
+                return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Not Approved. Please message landlord to tap the approve button in the notification feed."})
+
+            if monad.get_param_at(0).tenantState != "Approved":
+                return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Not Approved. Tenant in invalid state."})
+            
+            monad.get_param_at(0).deviceId = tenant.deviceId
+            monad = await monad \
+                .bind(self.db.update)
+            
             await RepositoryMaybeMonad() \
                 .bind(self.db.commit)
 

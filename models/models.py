@@ -53,6 +53,7 @@ class Tenant(Base):
             "id": self.id,
             "firstName": self.firstName,
             "lastName": self.lastName,
+            "password": self.password,
             "tenantState": self.tenantState,
             "tenantPosition": self.tenantPosition,
             "deviceId": self.deviceId

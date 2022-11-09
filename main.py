@@ -30,7 +30,7 @@ async def create_tenant(request: TempTenantSchema):
 
 @app.post("/Tenant/{tenantState}")
 async def update_tenant_state(tenantState: str, request: TenantStateSchema):
-    tenant = Tenant(**request.dict(), password="", tenantState=tenantState)
+    tenant = Tenant(**request.dict(), tenantState=tenantState)
     monad = await repository.update_tenant(tenant, tenantState)
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
@@ -42,6 +42,7 @@ async def update_tenant_state(tenantState: str, request: TenantStateSchema):
 @app.post("/Login")
 async def login(request: LoginSchema):
     loginData = request.dict()
+    
     tenant = Tenant(**loginData)
     monad = await repository.login(tenant, loginData["password"])
     if monad.has_errors():
