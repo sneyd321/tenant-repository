@@ -102,9 +102,6 @@ class Repository:
             if monad.get_param_at(0).tenantState == "PendingInvite":
                 return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Not Approved. Please check email for an email to activate you account."})
 
-            if monad.get_param_at(0).tenantState == "PendingApproval":
-                return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Not Approved. Please message landlord to tap the approve button in the notification feed."})
-
             if monad.get_param_at(0).tenantState != "Approved":
                 return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Not Approved. Tenant in invalid state."})
             
