@@ -120,3 +120,11 @@ class Repository:
             return await RepositoryMaybeMonad(tenant) \
                 .bind_data(self.db.get_by_house_id)
     
+
+    async def delete_tenant(self, tenant):
+        async with self.db.get_session():
+            monad = await RepositoryMaybeMonad(tenant) \
+                .bind(self.db.delete_by_email)
+            await RepositoryMaybeMonad() \
+                .bind(self.db.commit)
+            return monad

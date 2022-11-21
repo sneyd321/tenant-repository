@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class TenantSchema(BaseModel):
     firstName: str
     lastName: str
+    tenantState: str
     email: str
     password: str
 
