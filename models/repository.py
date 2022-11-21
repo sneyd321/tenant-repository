@@ -124,6 +124,13 @@ class Repository:
     async def delete_tenant(self, tenant):
         async with self.db.get_session():
             monad = await RepositoryMaybeMonad(tenant) \
+                .bind_data(self.db.get_tenant_by_email)
+
+            tenantFromDB = monad.get_param_at(0)
+            if tenantFromDB is None:
+                return RepositoryMaybeMonad(None, error_status={"status": 404, "reason": f"Tenant not found with email: {tenant.email}"})
+            
+            await RepositoryMaybeMonad(tenantFromDB) \
                 .bind(self.db.delete_by_email)
             await RepositoryMaybeMonad() \
                 .bind(self.db.commit)

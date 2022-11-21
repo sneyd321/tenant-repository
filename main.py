@@ -61,7 +61,7 @@ async def delete_tenant(request: TenantSchema):
     monad = await repository.delete_tenant(tenant)
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
-    return tenant.to_json()
+    return monad.get_param_at(0).to_json()
 
 
 if __name__ == '__main__':
