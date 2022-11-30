@@ -1,5 +1,0 @@
-{
-    "yaml.schemas": {
-        "https://raw.githubusercontent.com/deployphp/deployer/master/src/schema.json": "file:///c%3A/Users/Ryan_PC/Projects/RoomRv3-Backend/tenant-service/.github/workflows/deploy.yaml"
-    }
-}

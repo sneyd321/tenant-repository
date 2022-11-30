@@ -16,12 +16,17 @@ class Repository:
         async with self.db.get_session():
             monad = await RepositoryMaybeMonad(tenant) \
                 .bind_data(self.db.get_tenant_by_email)
-            if monad.get_param_at(0) is not None:
+            tenantFromDB = monad.get_param_at(0)
+
+            if tenantFromDB is not None:
                 return RepositoryMaybeMonad(None, error_status={"status": 409, "reason": "Failed to insert data into database"})
-            monad = await RepositoryMaybeMonad(tenant) \
+            
+            await RepositoryMaybeMonad(tenant) \
                 .bind(self.db.insert)
+
             await RepositoryMaybeMonad() \
                 .bind(self.db.commit)
+                
             return monad
            
 
@@ -54,7 +59,7 @@ class Repository:
                 .bind_data(self.db.get_tenant_by_email)
             tenantFromDB = monad.get_param_at(0)
             if tenantFromDB is None:
-                return RepositoryMaybeMonad(None, error_status={"status": 404, "reason": "Invalid email or password"})
+                return RepositoryMaybeMonad(None, error_status={"status": 404, "reason": "Email is not valid"})
 
             #Set Tenant Fields
             tenant.houseId = tenantFromDB.houseId
