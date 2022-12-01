@@ -1,4 +1,4 @@
-name: Run Failure Scenarios
+name: Run Success Scenarios
 on: [workflow_dispatch]
 
 jobs:
