@@ -8,11 +8,6 @@ variable "db_pass" {
   description = "MySQL Root Password"
 }
 
-variable "uuid" {
-  type = string
-  description = "suffix for DB"
-}
-
 resource "random_id" "db_name_suffix" {
   byte_length = 4
 }
