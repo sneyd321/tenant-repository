@@ -49,9 +49,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-          RANDOM_ID=uuidgen 
-          export $RANDOM_ID
-          terraform plan -no-color -var="project_id"=roomr-222721 -var="db_pass"=root -var="uuid"=$RANDOM_ID
+          terraform plan -no-color -var="project_id"=roomr-222721 -var="db_pass"=root 
         continue-on-error: true
       
       - name: Terraform Plan Status
@@ -77,6 +75,7 @@ jobs:
 
       - name: Run Test
         run: |
+          $RANDOM_ID=$(terraform output random_id)
           PUBLIC_IP=$(gcloud compute instances describe mysql-test-instance-$RANDOM_ID --zone=us-east5-a --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
           echo $PUBLIC_IP
 

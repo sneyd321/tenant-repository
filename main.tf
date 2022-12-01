@@ -13,6 +13,9 @@ variable "uuid" {
   description = "suffix for DB"
 }
 
+resource "random_id" "db_name_suffix" {
+  byte_length = 4
+}
 
 terraform {
   required_providers {
@@ -69,7 +72,7 @@ module "gce-container" {
 
 
 resource "google_compute_instance" "mysql-test-instance-1" {
-    name         = "mysql-test-instance-${var.uuid}"
+    name         = "mysql-test-instance-${random_id.db_name_suffix.hex}"
     machine_type = "e2-micro"
     zone         = "us-east5-a"
     allow_stopping_for_update = true
@@ -105,4 +108,8 @@ resource "google_compute_instance" "mysql-test-instance-1" {
 
 
 
+}
+
+output "random_id" {
+  value = random_id.db_name_suffix.hex
 }
