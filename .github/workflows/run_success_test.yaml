@@ -48,8 +48,7 @@ jobs:
       
       - name: Terraform Plan
         id: plan
-        run: |
-          terraform plan -no-color -var="project_id"=roomr-222721 -var="db_pass"=root 
+        run: terraform plan -no-color -var="project_id"=roomr-222721 -var="db_pass"=root 
         continue-on-error: true
       
       - name: Terraform Plan Status
