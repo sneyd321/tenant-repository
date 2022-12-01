@@ -33,6 +33,7 @@ async def update_tenant_state(tenantState: str, request: TenantStateSchema):
     tenant = Tenant(**request.dict(), tenantState=tenantState)
     monad = await repository.update_tenant(tenant, tenantState)
     if monad.has_errors():
+        print("TEST")
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return monad.get_param_at(0).to_json()
     
@@ -42,6 +43,7 @@ async def login(request: LoginSchema):
     tenant = Tenant(**loginData)
     monad = await repository.login(tenant, loginData["password"])
     if monad.has_errors():
+        
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return monad.get_param_at(0).to_json()
 
@@ -58,6 +60,7 @@ async def get_tenants_by_house_id(houseId: int):
 @app.delete("/Tenant")
 async def delete_tenant(request: TenantSchema):
     tenant = Tenant(**request.dict())
+    print(tenant.to_json())
     monad = await repository.delete_tenant(tenant)
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])

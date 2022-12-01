@@ -2,14 +2,13 @@ version: '3.5'
 
 services: 
 
-    mysql:
-        image: sneyd321/mysql
+    tenant-service:
+        image: sneyd321/tenant-service
+        environment:
+            - PORT=8085
         ports: 
-            - 3306:3306
-        environment: 
-            - MYSQL_ROOT_PASSWORD=Homeowner
-        cap_add:
-            - SYS_NICE
+            - 8085:8085
+     
 
   
             

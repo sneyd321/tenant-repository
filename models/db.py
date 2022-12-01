@@ -35,6 +35,7 @@ class DB:
 
 
     async def get_tenant_by_email(self, tenant):
+        print(tenant.email)
         result = await self.session.execute(select(Tenant).where(Tenant.email == tenant.email))
         return result.scalars().first()
 

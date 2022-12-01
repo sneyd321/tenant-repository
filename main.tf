@@ -1,3 +1,13 @@
+variable "project_id" {
+  type        = string
+  description = "GCP Project ID"
+}
+
+variable "db_pass" {
+  type        = string
+  description = "MySQL Root Password"
+}
+
 terraform {
   required_providers {
     google = {
@@ -8,9 +18,9 @@ terraform {
 }
 
 provider "google" {
-  project = "roomr-222721"
-  region  = "us-central1"
-  zone    = "us-central1-a"
+  project = var.project_id
+  region  = "us-east5"
+  zone    = "us-east5-a"
 }
 
 
@@ -20,19 +30,42 @@ module "gce-container" {
   
 
   container = {
-    name = "redis"
-    image = "us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/redis"
+    name = "mysql"
+    image = "us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/mysql"
+    env = [
+      {
+        name  = "MYSQL_ROOT_PASSWORD"
+        value = var.db_pass
+      },
+    ]
+    volumeMounts = [
+        {
+            mountPath = "/var/lib/mysql"
+            name = "mysql-volume"
+            readOnly  = false
+        }
+    ]
+    
   }
-  
+  volumes = [
+        {
+            name = "mysql-volume"
+            hostPath = {
+                path = "/var/db"
+            }
+
+        }
+    ]
+
   restart_policy = "Always"
  
 }
 
 
-resource "google_compute_instance" "redis-test-instance-1" {
-    name         = "redis-test-instance-1"
+resource "google_compute_instance" "mysql-test-instance-1" {
+    name         = "mysql-test-instance-1"
     machine_type = "e2-micro"
-    zone         = "us-central1-a"
+    zone         = "us-east5-a"
     allow_stopping_for_update = true
 
     labels = {
@@ -46,16 +79,19 @@ resource "google_compute_instance" "redis-test-instance-1" {
     boot_disk {
         auto_delete = true
         initialize_params {
+            
             image = module.gce-container.source_image
             type = "pd-standard"
             size = 10
         }
     }
-    tags = ["redis-server"]
+    tags = ["mysql-server"]
 
   network_interface {
     network = "default"
-    access_config {}
+    access_config {
+      network_tier = "STANDARD"
+    }
   }
 
   service_account {
