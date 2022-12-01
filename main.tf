@@ -110,3 +110,6 @@ resource "google_compute_instance" "mysql-test-instance-1" {
 
 }
 
+output "random_id" {
+  value = random_id.db_name_suffix.hex
+}
