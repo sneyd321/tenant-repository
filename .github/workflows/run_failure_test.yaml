@@ -66,6 +66,7 @@ jobs:
           pip install alembic
           pip install aiomysql
           pip install cryptography
+          pip install passlib
 
       - name: Run Alembic
         run: |
