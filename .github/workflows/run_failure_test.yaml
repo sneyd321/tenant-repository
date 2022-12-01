@@ -68,11 +68,6 @@ jobs:
           pip install cryptography
           pip install passlib
 
-      - name: Run Alembic
-        run: |
-          alembic revision --autogenerate
-          alembic upgrade head
-
       - name: Run Test
         run: |
           PUBLIC_IP=$(gcloud compute instances describe mysql-test-instance-1 --zone=us-east5-a --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
