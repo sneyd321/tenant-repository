@@ -85,3 +85,6 @@ jobs:
 
           docker compose run -eDB_HOST=$PUBLIC_IP tenant-service pytest tests/test_repository.py
       
+      - name: Terraform Destroy
+        if: always()
+        run: terraform destroy -auto-approve -var="project_id"=roomr-222721 -var="db_pass"=root
