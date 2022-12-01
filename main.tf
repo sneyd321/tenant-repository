@@ -87,15 +87,15 @@ resource "google_compute_instance" "mysql-test-instance-1" {
     }
     tags = ["mysql-server"]
 
-  network_interface {
-    network = "default"
-    access_config {
+    network_interface {
+      network = "default"
+      access_config {
+      }
     }
-  }
 
-  service_account {
-    scopes = [ "cloud-platform" ]
-  }
+    service_account {
+      scopes = [ "cloud-platform" ]
+    }
 
 
 

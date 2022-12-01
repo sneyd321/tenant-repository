@@ -59,16 +59,29 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.8
-      - name: Install dependencies
+
+      - name: Install alembic dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install alembic
+          pip install aiomysql
+          pip install cryptography
 
       - name: Run Alembic
         run: |
           alembic revision --autogenerate
           alembic upgrade head
 
-      - name: Test with pytest
+      - name: Run Test
         run: |
-          pytest tests/test_repository.py
+          PUBLIC_IP=$(gcloud compute instances describe mysql-test-instance-1 --zone=us-east5-a --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
+          echo $PUBLIC_IP
+
+          docker build -t sneyd321/tenant-service .  
+
+          python alembic_setup.py --user=root --password=root --database=roomr --host=$PUBLIC_IP
+          alembic revision --autogenerate
+          alembic upgrade head
+
+          docker compose run -eDB_HOST=$PUBLIC_IP tenant-service pytest tests/test_repository.py
+      
