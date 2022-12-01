@@ -75,7 +75,8 @@ jobs:
 
       - name: Run Test
         run: |
-          RANDOM_ID=$(terraform output random_id)
+          RANDOM_ID=$(terraform output random_id) | tr -d '"'
+          echo $RANDOM_ID
           PUBLIC_IP=$(gcloud compute instances describe mysql-test-instance-$RANDOM_ID --zone=us-east5-a --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
           echo $PUBLIC_IP
 
