@@ -3,8 +3,10 @@ from models.repository import Repository
 from models.models import Tenant
 import pytest, asyncio, json, os, time
 
+host = os.environ.get("DB_HOST", "localhost")
+
 async def test_Tenant_Service_will_return_error_if_account_with_same_email_exists():
-    db = DB("test", "homeowner", "localhost", "roomr")
+    db = DB("root", "root", host, "roomr")
     repository = Repository(db)
     with open(r"./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
@@ -14,7 +16,7 @@ async def test_Tenant_Service_will_return_error_if_account_with_same_email_exist
     assert monad.error_status == {"status": 409, "reason": "Tenant email already exists"}
 
 async def test_Tenant_Service_will_update_lease_position_when_greater_than_0():
-    db = DB("test", "homeowner", "localhost", "roomr")
+    db = DB("root", "root", host, "roomr")
     repository = Repository(db)
     with open(r"./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
@@ -23,7 +25,7 @@ async def test_Tenant_Service_will_update_lease_position_when_greater_than_0():
     assert tenant.tenantPosition == 1
 
 async def test_Tenant_Service_will_update_lease_position_when_equal_to_0():
-    db = DB("test", "homeowner", "localhost", "roomr")
+    db = DB("root", "root", host, "roomr")
     repository = Repository(db)
     with open(r"./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
@@ -33,7 +35,7 @@ async def test_Tenant_Service_will_update_lease_position_when_equal_to_0():
 
 
 async def test_Tenant_Service_will_return_error_account_does_not_exist_on_update_state():
-    db = DB("test", "homeowner", "localhost", "roomr")
+    db = DB("root", "root", host, "roomr")
     repository = Repository(db)
     with open("./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
@@ -43,7 +45,7 @@ async def test_Tenant_Service_will_return_error_account_does_not_exist_on_update
     assert monad.error_status == {"status": 404, "reason": f"Tenant not found with email: ${tenant.email}"}
 
 async def test_Tenant_Service_returns_an_error_message_when_account_does_not_exist():
-    db = DB("test", "homeowner", "localhost", "roomr")
+    db = DB("root", "root", host, "roomr")
     repository = Repository(db)
     with open("./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
@@ -54,7 +56,7 @@ async def test_Tenant_Service_returns_an_error_message_when_account_does_not_exi
 
 
 async def test_Tenant_Service_returns_an_error_message_with_invalid_house_id():
-    db = DB("test", "homeowner", "localhost", "roomr")
+    db = DB("root", "root", host, "roomr")
     repository = Repository(db)
     with open("./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
@@ -65,7 +67,7 @@ async def test_Tenant_Service_returns_an_error_message_with_invalid_house_id():
 
    
 async def test_Tenant_Service_returns_an_error_message_when_password_is_invalid():
-    db = DB("test", "homeowner", "localhost", "roomr")
+    db = DB("root", "root", host, "roomr")
     repository = Repository(db)
     with open("./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
@@ -74,7 +76,7 @@ async def test_Tenant_Service_returns_an_error_message_when_password_is_invalid(
     assert monad.error_status == {"status": 401, "reason": "Invalid email or password"}
 
 async def test_Tenant_Service_will_return_error_on_login_if_in_invite_pending_state():
-    db = DB("test", "homeowner", "localhost", "roomr")
+    db = DB("root", "root", host, "roomr")
     repository = Repository(db)
     with open("./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
@@ -85,7 +87,7 @@ async def test_Tenant_Service_will_return_error_on_login_if_in_invite_pending_st
 
 
 async def test_Tenant_Service_will_return_error_on_login_if_in_temp_account_created_state():
-    db = DB("test", "homeowner", "localhost", "roomr")
+    db = DB("root", "root", host, "roomr")
     repository = Repository(db)
     with open("./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
@@ -96,7 +98,7 @@ async def test_Tenant_Service_will_return_error_on_login_if_in_temp_account_crea
 
 
 async def test_Tenant_Service_will_return_error_on_login_if_in_invalid_state():
-    db = DB("test", "homeowner", "localhost", "roomr")
+    db = DB("root", "root", host, "roomr")
     repository = Repository(db)
     with open("./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
@@ -107,7 +109,7 @@ async def test_Tenant_Service_will_return_error_on_login_if_in_invalid_state():
 
 
 async def test_Tenant_Service_returns_an_empty_list_when_retrieving_a_list_of_zero_items():
-    db = DB("test", "homeowner", "localhost", "roomr")
+    db = DB("root", "root", host, "roomr")
     repository = Repository(db)
     with open("./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
@@ -117,7 +119,7 @@ async def test_Tenant_Service_returns_an_empty_list_when_retrieving_a_list_of_ze
     assert monad.get_param_at(0) == []
 
 async def Tenant_Service_returns_error_when_account_does_not_exist_on_delete():
-    db = DB("test", "homeowner", "localhost", "roomr")
+    db = DB("root", "root", host, "roomr")
     repository = Repository(db)
     with open("./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
