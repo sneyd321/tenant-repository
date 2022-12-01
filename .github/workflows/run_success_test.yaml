@@ -26,6 +26,13 @@ jobs:
       - name: Configure Docker
         run: gcloud auth configure-docker --quiet
 
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
+  
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
@@ -41,7 +48,10 @@ jobs:
       
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -var="project_id"=roomr-222721 -var="db_pass"=root
+        run: |
+          RANDOM_ID=uuidgen 
+          export $RANDOM_ID
+          terraform plan -no-color -var="project_id"=roomr-222721 -var="db_pass"=root -var="uuid"=$RANDOM_ID
         continue-on-error: true
       
       - name: Terraform Plan Status
@@ -55,10 +65,7 @@ jobs:
         run: sleep 30s
         shell: bash
 
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.8
+      
 
       - name: Install alembic dependencies
         run: |
@@ -70,7 +77,7 @@ jobs:
 
       - name: Run Test
         run: |
-          PUBLIC_IP=$(gcloud compute instances describe mysql-test-instance-1 --zone=us-east5-a --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
+          PUBLIC_IP=$(gcloud compute instances describe mysql-test-instance-$RANDOM_ID --zone=us-east5-a --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
           echo $PUBLIC_IP
 
           docker build -t sneyd321/tenant-service .  

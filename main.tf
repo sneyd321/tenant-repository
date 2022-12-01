@@ -8,9 +8,11 @@ variable "db_pass" {
   description = "MySQL Root Password"
 }
 
-resource "random_id" "db_name_suffix" {
-  byte_length = 4
+variable "uuid" {
+  type = string
+  description = "suffix for DB"
 }
+
 
 terraform {
   required_providers {
@@ -67,7 +69,7 @@ module "gce-container" {
 
 
 resource "google_compute_instance" "mysql-test-instance-1" {
-    name         = "mysql-test-instance-${random_id.db_name_suffix.hex}"
+    name         = "mysql-test-instance-${var.uuid}"
     machine_type = "e2-micro"
     zone         = "us-east5-a"
     allow_stopping_for_update = true
