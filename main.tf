@@ -8,6 +8,12 @@ variable "db_pass" {
   description = "MySQL Root Password"
 }
 
+resource "random_string" "random" {
+  length           = 16
+  special          = true
+  override_special = "/@£$"
+}
+
 terraform {
   required_providers {
     google = {
@@ -63,7 +69,7 @@ module "gce-container" {
 
 
 resource "google_compute_instance" "mysql-test-instance-1" {
-    name         = "mysql-test-instance-1"
+    name         = "mysql-test-instance-${random_string.random.result}"
     machine_type = "e2-micro"
     zone         = "us-east5-a"
     allow_stopping_for_update = true
