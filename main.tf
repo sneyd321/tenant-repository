@@ -90,7 +90,6 @@ resource "google_compute_instance" "mysql-test-instance-1" {
   network_interface {
     network = "default"
     access_config {
-      network_tier = "STANDARD"
     }
   }
 
