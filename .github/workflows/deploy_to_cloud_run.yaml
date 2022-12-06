@@ -29,7 +29,7 @@ jobs:
       - name: Deploy to Cloud run
         run: |
           PRIVATE_IP=$(gcloud compute instances describe mysql-instance-1 --zone=us-central1-a --format='get(networkInterfaces[0].networkIP)')
-          gcloud run deploy tenant-service --region=us-central1 --image us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service:latest --allow-unauthenticated --update-secrets=DB_PASS=DB_PASS:1 --update-env-vars DB_HOST=$PRIVATE_IP,DB_USER=root --vpc-connector=vpc-connector-2
+          gcloud run deploy tenant-service --region=us-central1 --image us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service:latest --allow-unauthenticated --update-secrets=DB_PASS=DB_PASS:1,/usr/src/app/models/static/ServiceAccount.json=projects/959426188245/secrets/firebase_service_account:1 --update-env-vars DB_HOST=$PRIVATE_IP,DB_USER=root --vpc-connector=vpc-connector-2
           
     
           

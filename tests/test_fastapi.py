@@ -23,7 +23,10 @@ def test_Tenant_Service_update_tenant_state_returns_successfully():
             "firstName": "Test",
             "lastName": "test",
             "email": "a@s.com",
-            "password": ""
+            "password": "",
+            "tenantState": "TempAccountCreated",
+            "houseId": 1,
+            "deviceId": ""
         })
     assert response.status_code == 200
     
@@ -44,7 +47,32 @@ def test_Tenant_Service_delete_returns_successfully():
         "password": "aaaaaa",
         "firstName": "",
         "lastName": "",
-        "tenantState": "Approved"
+        "tenantState": "Approved",
+        "houseId": 1,
+        "deviceId": ""
     })
     assert response.status_code == 200
 
+def test_Tenant_Service_update_tenant_returns_successfully():
+    response = requests.put("http://localhost:8085/Tenant", headers={}, json={
+        "email": "a@s.com",
+        "password": "aaaaaa",
+        "firstName": "",
+        "lastName": "",
+        "tenantState": "Approved",
+         "houseId": 1,
+        "deviceId": ""
+    })
+    assert response.status_code == 200
+
+def test_Tenant_Service_rejects_invalid_state():
+    response = requests.put("http://localhost:8085/Tenant/FDSAFDASFAS", headers={}, json={
+        "email": "a@s.com",
+        "password": "aaaaaa",
+        "firstName": "",
+        "lastName": "",
+        "tenantState": "Approved",
+         "houseId": 1,
+        "deviceId": ""
+    })
+    assert response.json()['status_code'] == 400

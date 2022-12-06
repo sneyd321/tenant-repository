@@ -20,6 +20,7 @@ class Tenant(Base):
     tenantPosition = Column(Integer(), nullable=False)
     tenantState = Column(String(30), nullable=False)
     deviceId = Column(String(180), nullable=True)
+    profileURL = Column(String(223), nullable=True)
 
     def __init__(self, password, **kwargs):
         self.houseId = kwargs.get("houseId")
@@ -30,6 +31,11 @@ class Tenant(Base):
         self.tenantPosition = 0
         self.tenantState = kwargs.get("tenantState")
         self.deviceId = kwargs.get("deviceId", "")
+
+    def initialize_profile(self, firebase, tenantId):
+        blob = firebase.create_blob_no_cache(f"Profiles/Tenant/Tenant_{tenantId}.jpg")
+        blob.upload_from_string(b"", content_type="image/jpg")
+        self.profileURL = blob.public_url
 
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
@@ -45,7 +51,8 @@ class Tenant(Base):
             "email": self.email,
             "tenantState": self.tenantState,
             "tenantPosition": self.tenantPosition,
-            "deviceId": self.deviceId
+            "deviceId": self.deviceId,
+            "profileURL": self.profileURL
         }
 
     def to_dict(self):

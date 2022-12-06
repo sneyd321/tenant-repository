@@ -5,3 +5,7 @@ scripts/versions/*
 !scripts/versions/.gitkeep
 venv
 scratchpad.txt
+
+models/static/ServiceAccount.json
+
+

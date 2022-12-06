@@ -1,9 +1,11 @@
 from fastapi import FastAPI, HTTPException
-from models.schemas import TenantSchema, LoginSchema, TempTenantSchema, TenantStateSchema
+from models.schemas import TenantSchema, LoginSchema, TempTenantSchema
 from models.db import DB
 from models.models import Tenant
 from models.repository import Repository
+from models.firebase import Firebase
 import uvicorn, os
+
 
 user = os.environ.get('DB_USER', "test")
 password = os.environ.get('DB_PASS', "homeowner")
@@ -12,13 +14,16 @@ database = os.environ.get('DB_DATABASE', "roomr")
 
 db = DB(user, password, host, database)
 repository = Repository(db)
-app = FastAPI()
 
+firebase = Firebase()
+firebase.setServiceAccountPath(r"./models/static/ServiceAccount.json")
+firebase.init_app()
+
+app = FastAPI()
 
 @app.get("/Health")
 async def health_check():
     return {"status": 200}
-
 
 @app.post("/Tenant")
 async def create_tenant(request: TempTenantSchema):
@@ -26,26 +31,33 @@ async def create_tenant(request: TempTenantSchema):
     monad = await repository.insert_temp(tenant)
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
-    return monad.get_param_at(0).to_json()
+    insertedTenant = monad.get_param_at(0)
+    insertedTenant.initialize_profile(firebase, insertedTenant.id)
+    return insertedTenant.to_json()
+
 
 @app.put("/Tenant/{tenantState}")
-async def update_tenant_state(tenantState: str, request: TenantStateSchema):
-    tenant = Tenant(**request.dict(), tenantState=tenantState)
-    monad = await repository.update_tenant(tenant, tenantState)
+async def update_tenant_state(tenantState: str, request: TenantSchema):
+    print(tenantState not in ["TempAccountCreated", "PendingInvite", "Approved"])
+    if tenantState not in ["TempAccountCreated", "PendingInvite", "Approved"]:
+        return HTTPException(status_code=400, detail="Invalid State")
+
+    tenant = Tenant(**request.dict())
+    monad = await repository.update_tenant_state(tenant, tenantState)
     if monad.has_errors():
-        print("TEST")
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return monad.get_param_at(0).to_json()
     
+
 @app.post("/Login")
 async def login(request: LoginSchema):
     loginData = request.dict()
     tenant = Tenant(**loginData)
     monad = await repository.login(tenant, loginData["password"])
     if monad.has_errors():
-        
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return monad.get_param_at(0).to_json()
+
 
 
 @app.get("/House/{houseId}/Tenant")
@@ -57,11 +69,20 @@ async def get_tenants_by_house_id(houseId: int):
     return [tenant.to_json() for tenant in monad.get_param_at(0)]
 
 
+
 @app.delete("/Tenant")
 async def delete_tenant(request: TenantSchema):
     tenant = Tenant(**request.dict())
-    print(tenant.to_json())
     monad = await repository.delete_tenant(tenant)
+    if monad.has_errors():
+        return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
+    return monad.get_param_at(0).to_json()
+
+
+@app.put("/Tenant")
+async def update_tenant(request: TenantSchema):
+    tenant = Tenant(**request.dict())
+    monad = await repository.update_tenant(tenant)
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return monad.get_param_at(0).to_json()
@@ -69,3 +90,4 @@ async def delete_tenant(request: TenantSchema):
 
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=8085)
+
