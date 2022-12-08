@@ -6,7 +6,6 @@ from models.repository import Repository
 from models.firebase import Firebase
 import uvicorn, os
 
-
 user = os.environ.get('DB_USER', "test")
 password = os.environ.get('DB_PASS', "homeowner")
 host = os.environ.get('DB_HOST', "localhost")
@@ -53,7 +52,6 @@ async def login(request: LoginSchema):
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return monad.get_param_at(0).to_json()
-
 
 
 @app.get("/House/{houseId}/Tenant")

@@ -1,8 +1,16 @@
 name: Deploy to cloud run
-on: [workflow_dispatch]
+on: 
+  workflow_dispatch:
+    inputs:
+      zone:
+        description: 'GCP Zone'     
+        required: true
+        default: 'us-east5'
+      
 
 
 jobs:
+  
   build:
     runs-on: ubuntu-latest
     
@@ -28,7 +36,7 @@ jobs:
           docker push us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service
       - name: Deploy to Cloud run
         run: |
-          PRIVATE_IP=$(gcloud compute instances describe mysql-instance-1 --zone=us-central1-a --format='get(networkInterfaces[0].networkIP)')
+          PRIVATE_IP=$(gcloud compute instances describe mysql-instance-1 --zone=${{ github.event.inputs.zone }} --format='get(networkInterfaces[0].networkIP)')
           gcloud run deploy tenant-service --region=us-central1 --image us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service:latest --allow-unauthenticated --update-secrets=DB_PASS=DB_PASS:1,/usr/src/app/models/static/ServiceAccount.json=projects/959426188245/secrets/firebase_service_account:1 --update-env-vars DB_HOST=$PRIVATE_IP,DB_USER=root --vpc-connector=vpc-connector-2
           
     
