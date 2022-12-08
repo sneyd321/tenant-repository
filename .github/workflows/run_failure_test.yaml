@@ -1,5 +1,19 @@
-name: Run Failure Scenarios
-on: [workflow_dispatch]
+name: Run Tests
+on: 
+  workflow_dispatch:
+    inputs:
+      zone:
+        description: 'GCP Zone'     
+        required: true
+        default: 'us-east5-a'
+      image:
+        description: 'Docker image that will be build, pushed and deployed on cloud run'     
+        required: true
+        default: 'tenant-service'
+      test-module:
+        description: 'File containing tests for pytest to execute'     
+        required: true
+        default: 'tests/test_repository.py'
 
 jobs:
   build:
@@ -72,16 +86,13 @@ jobs:
         run: |
           RANDOM_ID=$(terraform output random_id) | tr -d '"'
           echo $RANDOM_ID
-          PUBLIC_IP=$(gcloud compute instances describe mysql-test-instance-$RANDOM_ID --zone=us-east5-a --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
+          PUBLIC_IP=$(gcloud compute instances describe mysql-test-instance-$RANDOM_ID --zone=${{ github.event.inputs.zone }} --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
           echo $PUBLIC_IP
-
-          docker build -t sneyd321/tenant-service .  
-
+          docker build -t sneyd321/${{ github.event.inputs.image }} .  
           python alembic_setup.py --user=root --password=root --database=roomr --host=$PUBLIC_IP
           alembic revision --autogenerate
           alembic upgrade head
-
-          docker compose run -eDB_HOST=$PUBLIC_IP tenant-service pytest tests/test_repository.py
+          docker compose run -eDB_HOST=$PUBLIC_IP ${{ github.event.inputs.image }} pytest ${{ github.event.inputs.test-module }}
       
       - name: Terraform Destroy
         if: always()
