@@ -1,14 +1,16 @@
-name: Deploy to cloud run
+name: Deploy to Cloud Run
 on: 
   workflow_dispatch:
     inputs:
       zone:
         description: 'GCP Zone'     
         required: true
-        default: 'us-east5'
+        default: 'us-east5-a'
+      image:
+        description: 'Docker image that will be build, pushed and deployed on cloud run'     
+        required: true
+        default: 'tenant-service'
       
-
-
 jobs:
   
   build:
@@ -20,24 +22,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v0'
         with:
           workload_identity_provider: 'projects/959426188245/locations/global/workloadIdentityPools/github-action-pool-1/providers/github-action-provider-1'
           service_account: 'artifact-repository-access@roomr-222721.iam.gserviceaccount.com'
+      
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v0'
+      
       - name: Configure Docker
         run: |
           gcloud auth configure-docker us-central1-docker.pkg.dev
-
-          docker build -t us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service .
-          docker push us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service
-      - name: Deploy to Cloud run
+          docker build -t us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/${{ github.event.inputs.image }} .
+          docker push us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/${{ github.event.inputs.image }}
+      
+      - name: Deploy to Cloud Run
         run: |
           PRIVATE_IP=$(gcloud compute instances describe mysql-instance-1 --zone=${{ github.event.inputs.zone }} --format='get(networkInterfaces[0].networkIP)')
-          gcloud run deploy tenant-service --region=us-central1 --image us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/tenant-service:latest --allow-unauthenticated --update-secrets=DB_PASS=DB_PASS:1,/usr/src/app/models/static/ServiceAccount.json=projects/959426188245/secrets/firebase_service_account:1 --update-env-vars DB_HOST=$PRIVATE_IP,DB_USER=root --vpc-connector=vpc-connector-2
+          gcloud run deploy ${{ github.event.inputs.image }} --region=us-central1 --image us-central1-docker.pkg.dev/roomr-222721/roomr-docker-repo/${{ github.event.inputs.image }}:latest --allow-unauthenticated --update-secrets=DB_PASS=DB_PASS:1,/usr/src/app/models/static/ServiceAccount.json=projects/959426188245/secrets/firebase_service_account:1 --update-env-vars DB_HOST=$PRIVATE_IP,DB_USER=root --vpc-connector=vpc-connector-2
           
     
           
