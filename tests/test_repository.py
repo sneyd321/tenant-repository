@@ -1,9 +1,15 @@
 from models.db import DB
 from models.repository import Repository
 from models.models import Tenant
+from models.firebase import Firebase
 import pytest, asyncio, json, os, time
 
 host = os.environ.get("DB_HOST", "localhost")
+
+
+firebase = Firebase()
+firebase.setServiceAccountPath(r"./models/static/ServiceAccount.json")
+firebase.init_app()
 
 async def test_Tenant_Service_will_return_error_if_account_with_same_email_exists():
     db = DB("root", "root", host, "roomr")
@@ -11,8 +17,8 @@ async def test_Tenant_Service_will_return_error_if_account_with_same_email_exist
     with open(r"./tests/sample_tenant.json", mode="r") as sample_tenant:
         tenantData = json.load(sample_tenant)
         tenant = Tenant(**tenantData)
-    monad = await repository.insert_temp(tenant)
-    monad = await repository.insert_temp(tenant)
+    monad = await repository.insert_temp(tenant, firebase, isTest=True)
+    monad = await repository.insert_temp(tenant, firebase, isTest=True)
     assert monad.error_status == {"status": 409, "reason": "Tenant email already exists"}
 
 

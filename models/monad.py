@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from sqlalchemy.exc import OperationalError, IntegrityError
+from sqlalchemy.exc import OperationalError, IntegrityError, PendingRollbackError
 
 
 class RepositoryMaybeMonad:
@@ -31,6 +31,7 @@ class RepositoryMaybeMonad:
             return RepositoryMaybeMonad(None, error_status={"status": 502, "reason": "Failed to connect to database"})
         except IntegrityError:
             return RepositoryMaybeMonad(None, error_status={"status": 409, "reason": "Failed to insert data into database"})
+       
 
     async def bind_data(self, function: Callable):
         """
@@ -51,3 +52,4 @@ class RepositoryMaybeMonad:
             return RepositoryMaybeMonad(None, error_status={"status": 502, "reason": "Failed to connect to database"})
         except IntegrityError:
             return RepositoryMaybeMonad(None, error_status={"status": 409, "reason": "Failed to insert data into database"})
+        

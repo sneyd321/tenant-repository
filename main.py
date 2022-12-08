@@ -13,6 +13,7 @@ host = os.environ.get('DB_HOST', "localhost")
 database = os.environ.get('DB_DATABASE', "roomr")
 
 db = DB(user, password, host, database)
+
 repository = Repository(db)
 
 firebase = Firebase()
@@ -26,24 +27,21 @@ async def health_check():
     return {"status": 200}
 
 @app.post("/Tenant")
-async def create_tenant(request: TempTenantSchema):
-    tenant = Tenant(**request.dict(), password="", tenantState="Temp_Account_Created")
-    monad = await repository.insert_temp(tenant)
+async def create_tenant(request: TempTenantSchema, isTest: bool = False):
+    tenant = Tenant(**request.dict(), password="", phoneNumber="", profileURL="")
+    monad = await repository.insert_temp(tenant, firebase, isTest)
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
-    insertedTenant = monad.get_param_at(0)
-    insertedTenant.initialize_profile(firebase, insertedTenant.id)
-    return insertedTenant.to_json()
+
+    return monad.get_param_at(0).to_json()
 
 
-@app.put("/Tenant/{tenantState}")
-async def update_tenant_state(tenantState: str, request: TenantSchema):
-    print(tenantState not in ["TempAccountCreated", "PendingInvite", "Approved"])
-    if tenantState not in ["TempAccountCreated", "PendingInvite", "Approved"]:
+@app.put("/Tenant/{state}")
+async def update_tenant_state(state: str, request: TenantSchema):
+    if state not in ["TempAccountCreated", "PendingInvite", "Approved"]:
         return HTTPException(status_code=400, detail="Invalid State")
-
     tenant = Tenant(**request.dict())
-    monad = await repository.update_tenant_state(tenant, tenantState)
+    monad = await repository.update_tenant_state(tenant, state)
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return monad.get_param_at(0).to_json()
@@ -51,9 +49,7 @@ async def update_tenant_state(tenantState: str, request: TenantSchema):
 
 @app.post("/Login")
 async def login(request: LoginSchema):
-    loginData = request.dict()
-    tenant = Tenant(**loginData)
-    monad = await repository.login(tenant, loginData["password"])
+    monad = await repository.login(**request.dict())
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
     return monad.get_param_at(0).to_json()

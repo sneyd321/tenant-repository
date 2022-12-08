@@ -7,12 +7,28 @@ from models.models import Tenant
 from sqlalchemy import func
 
 
+
 class DB:
 
     def __init__(self, user, password, host, database):
         self.engine = create_async_engine(f"mysql+aiomysql://{user}:{password}@{host}/{database}", echo=False, pool_pre_ping=True)
         Session = sessionmaker(bind=self.engine, expire_on_commit=False, class_=AsyncSession)
         self.session = Session()
+            
+        
+        
+
+    async def fix_pending_rollback(self):
+        try:
+            _ = await self.session.connection()
+            await self.session.commit()
+            await self.session.flush()
+            print("No error?")
+        except PendingRollbackError:
+            print("TEST")
+            await self.session.rollback()
+
+        
         
 
     def get_session(self):
@@ -34,9 +50,8 @@ class DB:
         return result.scalars().all()
 
 
-    async def get_tenant_by_email(self, tenant):
-        print(tenant.email)
-        result = await self.session.execute(select(Tenant).where(Tenant.email == tenant.email))
+    async def get_tenant_by_email(self, email):
+        result = await self.session.execute(select(Tenant).where(Tenant.email == email))
         return result.scalars().first()
 
 
@@ -59,6 +74,9 @@ class DB:
 
     async def update(self, data):
         await self.session.execute(update(Tenant).where(Tenant.id == data.id).values(data.to_dict()))
+       
+    async def update_state(self, data):
+        await self.session.execute(update(Tenant).where(Tenant.id == data.id).values(data.set_state()))
        
        
     async def update_device_id(self, data):

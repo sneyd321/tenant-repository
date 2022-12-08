@@ -2,14 +2,15 @@ from pydantic import BaseModel
 
 
 class TenantSchema(BaseModel):
-    profileURL: str
     houseId: int
     firstName: str
     lastName: str
+    phoneNumber: str
     email: str
     password: str
-    tenantState: str
+    state: str
     deviceId: str
+    profileURL: str
 
 
 class TempTenantSchema(BaseModel):

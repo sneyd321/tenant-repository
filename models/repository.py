@@ -15,82 +15,88 @@ class Repository:
         return tenant
 
 
-    async def insert_temp(self, tenant):
+    async def insert_temp(self, tenant, firebase, isTest):
         async with self.db.get_session() as session:
-            monad = await RepositoryMaybeMonad(tenant).bind_data(self.db.get_tenant_by_email)
+            #Get Tenant to check if it exists
+            monad = await RepositoryMaybeMonad(tenant.email).bind_data(self.db.get_tenant_by_email)
+            if monad.has_errors():
+                return monad
             tenantFromDB = monad.get_param_at(0)
             if tenantFromDB is not None:
                 return RepositoryMaybeMonad(None, error_status={"status": 409, "reason": "Tenant email already exists"})
-            
+            #Insert Tenant
             monad = await RepositoryMaybeMonad(tenant).bind(self.db.insert)
+            print(monad.error_status)
             if monad.has_errors():
                 await RepositoryMaybeMonad().bind(self.db.rollback)
                 return monad
             await RepositoryMaybeMonad().bind(self.db.commit)
-            return monad
-           
-
-
-    async def update_tenant_state(self, tenant, tenantState):
-        async with self.db.get_session() as session:
-            monad = await RepositoryMaybeMonad(tenant).bind_data(self.db.get_tenant_by_email)
-            tenantFromDB = monad.get_param_at(0)
-            if tenantFromDB is None:
-                return RepositoryMaybeMonad(None, error_status={"status": 404, "reason": f"Tenant not found with email: ${tenant.email}"})
-
-            tenant.tenantState = tenantState
-            tenant.id = tenantFromDB.id
-            
-            monad = await RepositoryMaybeMonad(tenant).bind_data(self.db.count_tenants_in_house)
-            if monad.has_errors():
-                await RepositoryMaybeMonad().bind(self.db.rollback)
-                return monad
-
-            tenant = await self.set_tenant_lease_position(monad.get_param_at(0), tenant)
-            
+            print(monad.get_param_at(0).to_json())
+            #Don't add test data to prod folder
+            if isTest:
+                tenant.setProfileURL(firebase, f"Test/Tenant_{tenant.id}.jpg")
+            else:
+                tenant.setProfileURL(firebase, f"Profiles/Tenant/Tenant_{tenant.id}.jpg")
+            #Update Profile
             monad = await RepositoryMaybeMonad(tenant).bind(self.db.update)
             if monad.has_errors():
                 await RepositoryMaybeMonad().bind(self.db.rollback)
                 return monad
             await RepositoryMaybeMonad().bind(self.db.commit)
             return monad
+
+    
            
 
 
-    async def login(self, tenant, password):
+    async def update_tenant_state(self, tenant, state):
         async with self.db.get_session() as session:
-            monad = await RepositoryMaybeMonad(tenant).bind_data(self.db.get_tenant_by_email)
+            #Get Tenant to check is it exists
+            monad = await RepositoryMaybeMonad(tenant.email).bind_data(self.db.get_tenant_by_email)
+            tenantFromDB = monad.get_param_at(0)
+            if tenantFromDB is None:
+                return RepositoryMaybeMonad(None, error_status={"status": 404, "reason": f"Tenant not found with email: ${tenant.email}"})
+            #Update tenant 
+            tenant.id = tenantFromDB.id
+            tenant.state = state
+            monad = await RepositoryMaybeMonad(tenant).bind(self.db.update_state)
+            if monad.has_errors():
+                await RepositoryMaybeMonad().bind(self.db.rollback)
+                return monad
+            await RepositoryMaybeMonad().bind(self.db.commit)
+            return monad
+           
+
+
+    async def login(self, email, password, houseId, deviceId):
+        async with self.db.get_session() as session:
+            #Check if Tenant exists 
+            monad = await RepositoryMaybeMonad(email).bind_data(self.db.get_tenant_by_email)
             tenantFromDB = monad.get_param_at(0)
             if tenantFromDB is None:
                 return RepositoryMaybeMonad(None, error_status={"status": 404, "reason": "Invalid email or password"})
-    
-
-            if not tenant.verify_password(password, tenantFromDB.password):
+            #Is password valid?
+            print(tenantFromDB.get_password_hash(password))
+            print(tenantFromDB.password)
+            if not tenantFromDB.verify_password(password, tenantFromDB.password):
                 return RepositoryMaybeMonad(None, error_status={"status": 401, "reason": "Invalid email or password"})
-
-
-            if tenant.houseId != tenantFromDB.houseId:
+            #Is correct houseId?
+            if houseId != tenantFromDB.houseId:
                 return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Invalid house key"})
-            
-
-            if tenant.tenantState == "TempAccountCreated":
+            #Is in valid state?
+            if tenantFromDB.state == "TempAccountCreated":
                 return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Not Approved. Please message landlord to invite you."})
-
-
-            if tenant.tenantState == "PendingInvite":
+            if tenantFromDB.state == "PendingInvite":
                 return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Not Approved. Please check email for an email to activate you account."})
-
-
-            if tenant.tenantState != "Approved":
+            if tenantFromDB.state != "Approved":
                 return RepositoryMaybeMonad(None, error_status={"status": 403, "reason": "Not Approved. Tenant in invalid state."})
             
-
-            tenantFromDB.deviceId = tenant.deviceId
+            #Update device id
+            tenantFromDB.deviceId = deviceId
             monad = await RepositoryMaybeMonad(tenantFromDB).bind(self.db.update)
             if monad.has_errors():
                 await RepositoryMaybeMonad().bind(self.db.rollback)
                 return monad
-
             await RepositoryMaybeMonad().bind(self.db.commit)
             return monad
         
@@ -105,7 +111,8 @@ class Repository:
 
     async def delete_tenant(self, tenant):
         async with self.db.get_session() as session:
-            monad = await RepositoryMaybeMonad(tenant).bind_data(self.db.get_tenant_by_email)
+            
+            monad = await RepositoryMaybeMonad(tenant.email).bind_data(self.db.get_tenant_by_email)
             tenantFromDB = monad.get_param_at(0)
             if tenantFromDB is None:
                 return RepositoryMaybeMonad(None, error_status={"status": 404, "reason": f"Tenant not found with email: {tenant.email}"})
@@ -122,7 +129,7 @@ class Repository:
 
     async def update_tenant(self, tenant):
         async with self.db.get_session() as session:
-            monad = await RepositoryMaybeMonad(tenant).bind_data(self.db.get_tenant_by_email)
+            monad = await RepositoryMaybeMonad(tenant.email).bind_data(self.db.get_tenant_by_email)
             tenantFromDB = monad.get_param_at(0)
             if tenantFromDB is None:
                 return RepositoryMaybeMonad(None, error_status={"status": 404, "reason": f"Tenant not found with email: ${tenant.email}"})

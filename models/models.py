@@ -16,24 +16,30 @@ class Tenant(Base):
     firstName = Column(String(100), nullable=False)
     lastName = Column(String(100), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
+    phoneNumber = Column(String(255), nullable=False)
     password = Column(String(255), nullable=False)
-    tenantPosition = Column(Integer(), nullable=False)
-    tenantState = Column(String(30), nullable=False)
+    state = Column(String(30), nullable=False)
     deviceId = Column(String(180), nullable=True)
     profileURL = Column(String(223), nullable=True)
 
-    def __init__(self, password, **kwargs):
+    def __init__(self, **kwargs):
         self.houseId = kwargs.get("houseId")
         self.firstName = kwargs.get("firstName")
         self.lastName = kwargs.get("lastName")
         self.email = kwargs.get("email")
-        self.password = self.get_password_hash(password)
-        self.tenantPosition = 0
-        self.tenantState = kwargs.get("tenantState")
+        self.password = kwargs.get("password")
+        self.phoneNumber = kwargs.get("phoneNumber")
+        self.state = "Temp_Account_Created"
         self.deviceId = kwargs.get("deviceId", "")
+        self.profileURL = kwargs.get("profileURL")
 
-    def initialize_profile(self, firebase, tenantId):
-        blob = firebase.create_blob_no_cache(f"Profiles/Tenant/Tenant_{tenantId}.jpg")
+    def set_state(self):
+        return {
+            "state": self.state
+        }
+
+    def setProfileURL(self, firebase, bucketPath):
+        blob = firebase.create_blob_no_cache(bucketPath)
         blob.upload_from_string(b"", content_type="image/jpg")
         self.profileURL = blob.public_url
 
@@ -49,21 +55,22 @@ class Tenant(Base):
             "firstName": self.firstName,
             "lastName": self.lastName,
             "email": self.email,
-            "tenantState": self.tenantState,
-            "tenantPosition": self.tenantPosition,
+            "phoneNumber": self.phoneNumber,
+            "state": self.state,
             "deviceId": self.deviceId,
             "profileURL": self.profileURL
         }
+
+    
 
     def to_dict(self):
         return {
             "id": self.id,
             "firstName": self.firstName,
             "lastName": self.lastName,
-            "password": self.password,
-            "tenantState": self.tenantState,
-            "tenantPosition": self.tenantPosition,
-            "deviceId": self.deviceId
+            "password": self.get_password_hash(self.password),
+            "deviceId": self.deviceId,
+            "profileURL": self.profileURL
         }
     
 
