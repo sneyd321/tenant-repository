@@ -73,4 +73,8 @@ class Tenant(Base):
             "profileURL": self.profileURL
         }
     
+    def update_device_id(self):
+        return {
+            "deviceId": self.deviceId,
+        }
 

@@ -93,7 +93,8 @@ class Repository:
             
             #Update device id
             tenantFromDB.deviceId = deviceId
-            monad = await RepositoryMaybeMonad(tenantFromDB).bind(self.db.update)
+            monad = await RepositoryMaybeMonad(tenantFromDB).bind(self.db.update_device_id)
+
             if monad.has_errors():
                 await RepositoryMaybeMonad().bind(self.db.rollback)
                 return monad
@@ -136,6 +137,7 @@ class Repository:
 
             tenant.id = tenantFromDB.id
             monad = await RepositoryMaybeMonad(tenant).bind(self.db.update)
+
             if monad.has_errors():
                 await RepositoryMaybeMonad().bind(self.db.rollback)
                 return monad

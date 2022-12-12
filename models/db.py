@@ -80,7 +80,7 @@ class DB:
        
        
     async def update_device_id(self, data):
-        await self.session.execute(update(Tenant).where(Tenant.id == data.id).values(data.to_dict()))
+        await self.session.execute(update(Tenant).where(Tenant.id == data.id).values(data.update_device_id()))
 
     async def delete_by_email(self, data):
         await self.session.execute(delete(Tenant).where(Tenant.email == data.email))
