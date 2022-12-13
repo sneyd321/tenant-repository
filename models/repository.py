@@ -136,6 +136,7 @@ class Repository:
                 return RepositoryMaybeMonad(None, error_status={"status": 404, "reason": f"Tenant not found with email: {tenant.email}"})
 
             tenant.id = tenantFromDB.id
+            tenant.houseId = tenantFromDB.houseId
             monad = await RepositoryMaybeMonad(tenant).bind(self.db.update)
 
             if monad.has_errors():

@@ -9,6 +9,7 @@ class TenantSchema(BaseModel):
     profileURL: str
 
 
+
 class TempTenantSchema(BaseModel):
     firstName: str
     lastName: str
