@@ -133,7 +133,7 @@ class Repository:
             monad = await RepositoryMaybeMonad(tenant.email).bind_data(self.db.get_tenant_by_email)
             tenantFromDB = monad.get_param_at(0)
             if tenantFromDB is None:
-                return RepositoryMaybeMonad(None, error_status={"status": 404, "reason": f"Tenant not found with email: ${tenant.email}"})
+                return RepositoryMaybeMonad(None, error_status={"status": 404, "reason": f"Tenant not found with email: {tenant.email}"})
 
             tenant.id = tenantFromDB.id
             monad = await RepositoryMaybeMonad(tenant).bind(self.db.update)

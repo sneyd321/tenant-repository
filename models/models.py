@@ -68,8 +68,8 @@ class Tenant(Base):
             "id": self.id,
             "firstName": self.firstName,
             "lastName": self.lastName,
+            "phoneNumber": self.phoneNumber,
             "password": self.get_password_hash(self.password),
-            "deviceId": self.deviceId,
             "profileURL": self.profileURL
         }
     

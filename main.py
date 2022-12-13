@@ -66,7 +66,7 @@ async def get_tenants_by_house_id(houseId: int):
 
 @app.delete("/Tenant")
 async def delete_tenant(request: TenantSchema):
-    tenant = Tenant(**request.dict())
+    tenant = Tenant(**request.dict(), password="")
     monad = await repository.delete_tenant(tenant)
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
@@ -75,7 +75,7 @@ async def delete_tenant(request: TenantSchema):
 
 @app.put("/Tenant")
 async def update_tenant(request: TenantSchema):
-    tenant = Tenant(**request.dict())
+    tenant = Tenant(**request.dict(), password="")
     monad = await repository.update_tenant(tenant)
     if monad.has_errors():
         return HTTPException(status_code=monad.error_status["status"], detail=monad.error_status["reason"])
