@@ -15,7 +15,6 @@ class CreateTenantSchema(BaseModel):
     phoneNumber: str
     password: str
     email: str
-    profileURL: str
 
 
 class TempTenantSchema(BaseModel):

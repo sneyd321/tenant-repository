@@ -59,11 +59,12 @@ class Repository:
             tenant.state = state
             tenant.houseId = tenantFromDB.houseId
             tenant.profileURL = tenantFromDB.profileURL
-            print(tenant.password)
+         
             monad = await RepositoryMaybeMonad(tenant).bind(self.db.update_state)
             if monad.has_errors():
                 await RepositoryMaybeMonad().bind(self.db.rollback)
                 return monad
+           
             await RepositoryMaybeMonad().bind(self.db.commit)
             return monad
            
@@ -77,8 +78,6 @@ class Repository:
             if tenantFromDB is None:
                 return RepositoryMaybeMonad(None, error_status={"status": 404, "reason": "Invalid email or password"})
             #Is password valid?
-            print(tenantFromDB.get_password_hash(password))
-            print(tenantFromDB.password)
             if not tenantFromDB.verify_password(password, tenantFromDB.password):
                 return RepositoryMaybeMonad(None, error_status={"status": 401, "reason": "Invalid email or password"})
             #Is correct houseId?

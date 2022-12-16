@@ -58,7 +58,8 @@ class Tenant(Base):
             "phoneNumber": self.phoneNumber,
             "state": self.state,
             "deviceId": self.deviceId,
-            "profileURL": self.profileURL
+            "profileURL": self.profileURL,
+            "password": self.password
         }
 
     def update_profile_url(self):
@@ -73,7 +74,7 @@ class Tenant(Base):
             "firstName": self.firstName,
             "lastName": self.lastName,
             "phoneNumber": self.phoneNumber,
-            "password": self.get_password_hash(self.password),
+            "password": self.get_password_hash(self.password)
         }
     
     def update_device_id(self):
