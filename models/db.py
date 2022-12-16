@@ -77,8 +77,11 @@ class DB:
        
     async def update_state(self, data):
         await self.session.execute(update(Tenant).where(Tenant.id == data.id).values(data.set_state()))
-       
-       
+    
+    async def update_profile_url(self, data):
+        await self.session.execute(update(Tenant).where(Tenant.id == data.id).values(data.update_profile_url()))
+    
+
     async def update_device_id(self, data):
         await self.session.execute(update(Tenant).where(Tenant.id == data.id).values(data.update_device_id()))
 

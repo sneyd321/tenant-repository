@@ -26,19 +26,17 @@ class Repository:
                 return RepositoryMaybeMonad(None, error_status={"status": 409, "reason": "Tenant email already exists"})
             #Insert Tenant
             monad = await RepositoryMaybeMonad(tenant).bind(self.db.insert)
-            print(monad.error_status)
             if monad.has_errors():
                 await RepositoryMaybeMonad().bind(self.db.rollback)
                 return monad
             await RepositoryMaybeMonad().bind(self.db.commit)
-            print(monad.get_param_at(0).to_json())
             #Don't add test data to prod folder
             if isTest:
                 tenant.setProfileURL(firebase, f"Test/Tenant_{tenant.id}.jpg")
             else:
                 tenant.setProfileURL(firebase, f"Profiles/Tenant/Tenant_{tenant.id}.jpg")
             #Update Profile
-            monad = await RepositoryMaybeMonad(tenant).bind(self.db.update)
+            monad = await RepositoryMaybeMonad(tenant).bind(self.db.update_profile_url)
             if monad.has_errors():
                 await RepositoryMaybeMonad().bind(self.db.rollback)
                 return monad
@@ -59,6 +57,8 @@ class Repository:
             #Update tenant 
             tenant.id = tenantFromDB.id
             tenant.state = state
+            tenant.houseId = tenantFromDB.houseId
+            tenant.profileURL = tenantFromDB.profileURL
             monad = await RepositoryMaybeMonad(tenant).bind(self.db.update_state)
             if monad.has_errors():
                 await RepositoryMaybeMonad().bind(self.db.rollback)

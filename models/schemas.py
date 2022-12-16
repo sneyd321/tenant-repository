@@ -6,7 +6,6 @@ class TenantSchema(BaseModel):
     lastName: str
     phoneNumber: str
     email: str
-    profileURL: str
 
 
 

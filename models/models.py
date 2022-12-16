@@ -61,6 +61,10 @@ class Tenant(Base):
             "profileURL": self.profileURL
         }
 
+    def update_profile_url(self):
+        return {
+            "profileURL": self.profileURL
+        }
     
 
     def to_dict(self):
@@ -70,7 +74,6 @@ class Tenant(Base):
             "lastName": self.lastName,
             "phoneNumber": self.phoneNumber,
             "password": self.get_password_hash(self.password),
-            "profileURL": self.profileURL
         }
     
     def update_device_id(self):
