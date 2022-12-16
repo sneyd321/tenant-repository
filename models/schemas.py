@@ -6,7 +6,16 @@ class TenantSchema(BaseModel):
     lastName: str
     phoneNumber: str
     email: str
+    profileURL: str
 
+
+class CreateTenantSchema(BaseModel):
+    firstName: str
+    lastName: str
+    phoneNumber: str
+    password: str
+    email: str
+    profileURL: str
 
 
 class TempTenantSchema(BaseModel):

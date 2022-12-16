@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from models.schemas import TenantSchema, LoginSchema, TempTenantSchema
+from models.schemas import TenantSchema, LoginSchema, TempTenantSchema, CreateTenantSchema
 from models.db import DB
 from models.models import Tenant
 from models.repository import Repository
@@ -36,7 +36,7 @@ async def create_tenant(request: TempTenantSchema, isTest: bool = False):
 
 
 @app.put("/Tenant/{state}")
-async def update_tenant_state(state: str, request: TenantSchema):
+async def update_tenant_state(state: str, request: CreateTenantSchema):
     if state not in ["TempAccountCreated", "PendingInvite", "Approved"]:
         return HTTPException(status_code=400, detail="Invalid State")
     tenant = Tenant(**request.dict())
