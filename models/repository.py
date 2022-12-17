@@ -64,6 +64,11 @@ class Repository:
             if monad.has_errors():
                 await RepositoryMaybeMonad().bind(self.db.rollback)
                 return monad
+
+            monad = await RepositoryMaybeMonad(tenant).bind(self.db.update)
+            if monad.has_errors():
+                await RepositoryMaybeMonad().bind(self.db.rollback)
+                return monad
            
             await RepositoryMaybeMonad().bind(self.db.commit)
             return monad
