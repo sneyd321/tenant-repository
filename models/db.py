@@ -75,6 +75,9 @@ class DB:
     async def update(self, data):
         await self.session.execute(update(Tenant).where(Tenant.id == data.id).values(data.to_dict()))
        
+    async def update_ignore_password(self, data):
+        await self.session.execute(update(Tenant).where(Tenant.id == data.id).values(data.update()))
+
     async def update_state(self, data):
         await self.session.execute(update(Tenant).where(Tenant.id == data.id).values(data.set_state()))
     

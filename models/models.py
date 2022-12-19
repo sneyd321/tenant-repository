@@ -75,6 +75,14 @@ class Tenant(Base):
             "phoneNumber": self.phoneNumber,
             "password": self.get_password_hash(self.password)
         }
+
+    def update(self):
+        return {
+            "id": self.id,
+            "firstName": self.firstName,
+            "lastName": self.lastName,
+            "phoneNumber": self.phoneNumber,
+        }
     
     def update_device_id(self):
         return {

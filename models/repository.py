@@ -142,8 +142,8 @@ class Repository:
 
             tenant.id = tenantFromDB.id
             tenant.houseId = tenantFromDB.houseId
-            tenant.password = tenantFromDB.password
-            monad = await RepositoryMaybeMonad(tenant).bind(self.db.update)
+
+            monad = await RepositoryMaybeMonad(tenant).bind(self.db.update_ignore_password)
 
             if monad.has_errors():
                 await RepositoryMaybeMonad().bind(self.db.rollback)
