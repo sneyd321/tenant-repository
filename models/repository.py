@@ -59,7 +59,6 @@ class Repository:
             tenant.state = state
             tenant.houseId = tenantFromDB.houseId
             tenant.profileURL = tenantFromDB.profileURL
-            tenant.password = tenantFromDB.password
          
             monad = await RepositoryMaybeMonad(tenant).bind(self.db.update_state)
             if monad.has_errors():
@@ -143,6 +142,7 @@ class Repository:
 
             tenant.id = tenantFromDB.id
             tenant.houseId = tenantFromDB.houseId
+            tenant.password = tenantFromDB.password
             monad = await RepositoryMaybeMonad(tenant).bind(self.db.update)
 
             if monad.has_errors():
